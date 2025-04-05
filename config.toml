@@ -1,0 +1,13 @@
+baseURL = "https://tarabhushan.com/"
+languageCode = "en-us"
+title = "Tara Bhushan"
+theme = "PaperMod"
+
+[params]
+  author = "Tara Bhushan"
+  ShowReadingTime = true
+  homeInfoParams = { Title = "Hi, I'm Tara 👋", Content = "Cloud Architect | Tech Writer | Career Mentor" }
+  socialIcons = [
+    { name = "linkedin", url = "https://www.linkedin.com/in/tara-bhushan-b8822bb1/" },
+    { name = "github", url = "https://github.com/it2008018" }
+  ]
