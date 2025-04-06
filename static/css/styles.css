@@ -1,313 +1,218 @@
 /* Global Styles */
 * {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-  }
-  body {
-    background: #0d0d0d; /* Dark base */
-    overflow: hidden;
-    position: relative;
-  }
-  
-  .profile-image {
-    width: 120px;         /* Set a fixed width */
-    height: 120px;        /* Set a fixed height */
-    border-radius: 50%;   /* Make the image circular */
-    object-fit: cover;    /* Ensures the image fills the circle without distortion */
-    border: 3px solid #fff; /* Optional: Adds a white border around the image */
-    display: block;       /* Ensures it's treated as a block element */
-    margin: 20px auto;    /* Centers the image */
-  }
-  .glow-container {
-    position: fixed;
-    width: 100vw;
-    height: 100vh;
-    top: 0;
-    left: 0;
-    z-index: -1;
-    pointer-events: none;
-  }
-  
-  .glow-circle {
-    position: absolute;
-    border-radius: 50%;
-    filter: blur(100px);
-    opacity: 0.6;
-    animation: float 10s ease-in-out infinite alternate;
-  }
-  
-  /* You can add multiple colors with different sizes and positions */
-  .glow-one {
-    width: 400px;
-    height: 400px;
-    background: rgba(255, 0, 183, 0.5); /* Cyan glow */
-    top: 10%;
-    left: 15%;
-  }
-  
-  .glow-two {
-    width: 300px;
-    height: 300px;
-    background: rgba(206, 174, 211, 0.468); /* Magenta glow */
-    bottom: 20%;
-    right: 10%;
-  }
-  
-  .glow-three {
-    width: 250px;
-    height: 250px;
-    background: rgba(255, 255, 0, 0.4); /* Yellow glow */
-    top: 50%;
-    left: 60%;
-  }
-  
-  @keyframes float {
-    0% {
-      transform: translateY(0px) translateX(0px);
-    }
-    100% {
-      transform: translateY(-20px) translateX(20px);
-    }
-  }   
-  header {
-    height: 100vh;
-    /* background: url('path_to_your_artistic_image.jpg') no-repeat center center/cover; */
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    text-align: center;
-    flex-direction: column;  /* Stacks items vertically */
-    position: relative;
-    background: transparent;
-  }
-
-  .container {
-    max-width: 1200px;
-    margin: 0 20px;
-  }
-  
-  .title {
-    font-size: 4.5rem;
-    letter-spacing: 1px;
-    color: #fff;
-    font-weight: 700;
-    text-transform: uppercase;
-    animation: fadeIn 2s ease-in-out;
-  }
-  
-  .subtitle {
-    font-size: 1.8rem;
-    color: #fff;
-    font-weight: 300;
-    margin: 10px 0 30px;  /* Adds spacing between subtitle and CTA links */
-  }
-  
-  .cta-links {
-    display: flex;
-    gap: 20px;
-    justify-content: center; /* Centers the links */
-  }
-  
- /* .cta-link {
-    font-size: 1.5rem;
-    color: #FF6F61;
-    text-decoration: none;
-    padding: 10px 20px;
-    border-radius: 30px;
-    background-color: transparent;
-    transition: all 0.3s ease;
-  }
-  
-  .cta-link:hover {
-    background-color: #FF6F61;
-    color: white;
-    box-shadow: 0 4px 15px rgba(255, 111, 97, 0.3);
-  }
-  */
-  /* Section Styles */
-  .section {
-    padding: 80px 20px; /* Add extra padding for better spacing */
-    text-align: center;
-    background-color: #222;
-    border-radius: 8px; /* Add rounded corners for a softer look */
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.6); /* Add subtle shadow for depth */
-    margin-bottom: 40px; /* Add space between sections */
-    transition: all 0.3s ease-in-out; /* Smooth transition for hover effect */
-  }
-  
-  .about, .blog {
-    background-color: #333; /* Darken background for contrast */
-  }
-  
-  h2 {
-    font-size: 2.5rem;
-    margin-bottom: 20px;
-    color: #FF6F61; /* Add a vibrant color to the heading */
-    text-transform: uppercase;
-    letter-spacing: 2px;
-  }
-  
-  ul {
-    list-style: none;
-    padding-left: 0;
-  }
-  
-  ul li {
-    font-size: 1.2rem;
-    margin: 15px 0;
-    transition: color 0.3s ease-in-out; /* Smooth color transition for hover effect */
-  }
-  
-  ul li a {
-    color: #FF6F61; /* Link color matching the section title */
-    text-decoration: none;
-    transition: color 0.3s ease-in-out;
-  }
-  
-  ul li a:hover {
-    color: #fff; /* Change link color on hover */
-    text-decoration: underline;
-  }
-  
-  /* Add hover effect on the whole section */
-  .section:hover {
-    transform: translateY(-10px); /* Lift the section on hover */
-    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.7); /* Intensify shadow on hover */
-    background-color: #444; /* Lighten the background on hover */
-  }
-  
-  /* Add some padding and a border to the 'Learn More' button */
-  .cta-link {
-    font-size: 1.5rem;
-    color: #ebe7e6;
-    text-decoration: none;
-    padding: 12px 25px;
-    border-radius: 30px;
-    background-color: transparent;
-    border: 2px solid #dfe492;
-    margin-top: 20px;
-    transition: all 0.3s ease;
-  }
-  
-  .cta-link:hover {
-    background-color: #f3e3e2;
-    color: white;
-    box-shadow: 0 4px 15px rgba(255, 111, 97, 0.3);
-  }
-  
-  /* Footer Styles */
-  footer {
-    background-color: #1b1b1b;
-    padding: 20px;
-    text-align: center;
-    color: #fff;
-  }
-  
-  footer p {
-    font-size: 1rem;
-  }
-  
-  /* Animation */
-  @keyframes fadeIn {
-    from {
-      opacity: 0;
-    }
-    to {
-      opacity: 1;
-    }
-  }
-
-  .title-line {
-    font-size: 3rem;
-    font-weight: bold;
-    font-family: 'Segoe UI', sans-serif;
-    margin-bottom: 20px;  /* Adds space below the title */
-    color: #fff;  /* Sets the text color to white */
-    text-shadow: 0 0 10px rgba(255, 255, 255, 0.7), 0 0 20px rgba(255, 255, 255, 0.6), 0 0 30px rgba(255, 255, 255, 0.5); /* Adds glowing effect */
-  }
-
-.star {
-  animation: pulse 1.5s infinite;
-  display: inline-block;
-}
-
-@keyframes pulse {
-  0%   { transform: scale(1); opacity: 0.8; }
-  50%  { transform: scale(1.2); opacity: 1; }
-  100% { transform: scale(1); opacity: 0.8; }
-}
-
-.main-content {
-  position: relative;
-  z-index: 1;
-  padding-top: 2rem;
-}
-
-* {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
 }
 
 body {
-  background: #0d0d0d; /* Dark base */
-  font-family: Arial, sans-serif;
+  background: #0d0d0d;
+  font-family: 'Segoe UI', Arial, sans-serif;
   color: #fff;
-  overflow: auto;  /* Allow scrolling */
-}
-
-h1, h2 {
-  color: #eadddc;
-}
-
-.container {
-  display: flex;
-  flex-direction: column;
-  padding: 50px;
-  max-width: 900px;
-  margin: 0 auto;
+  overflow: auto;
   position: relative;
 }
 
-.header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 10px;
+/* Glow Background */
+.glow-container {
+  position: fixed;
+  width: 100vw;
+  height: 100vh;
+  top: 0;
+  left: 0;
+  z-index: -1;
+  pointer-events: none;
 }
 
-.profile-image {
-  width: 150px;
-  height: 150px;
+.glow-circle {
+  position: absolute;
   border-radius: 50%;
-  border: 3px solid #fff;
+  filter: blur(100px);
+  opacity: 0.6;
+  animation: float 10s ease-in-out infinite alternate;
+}
+
+.glow-one {
+  width: 400px;
+  height: 400px;
+  background: rgba(255, 0, 183, 0.5);
+  top: 10%;
+  left: 15%;
+}
+
+.glow-two {
+  width: 300px;
+  height: 300px;
+  background: rgba(206, 174, 211, 0.468);
+  bottom: 20%;
+  right: 10%;
+}
+
+.glow-three {
+  width: 250px;
+  height: 250px;
+  background: rgba(255, 255, 0, 0.4);
+  top: 50%;
+  left: 60%;
+}
+
+@keyframes float {
+  0% {
+    transform: translateY(0px) translateX(0px);
+  }
+  100% {
+    transform: translateY(-20px) translateX(20px);
+  }
+}
+
+/* Header Section */
+header {
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  flex-direction: column;
+  position: relative;
+  background: transparent;
+}
+
+/* Profile Image */
+.profile-image {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
   object-fit: cover;
+  border: 3px solid #fff;
+  display: block;
+  margin: 20px auto;
 }
 
-.content {
-  margin-top: 5px; /* Reduced to bring the content closer */
+/* Container */
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 50px 20px;
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
 }
 
+/* Title */
+.title {
+  font-size: 4.5rem;
+  letter-spacing: 1px;
+  color: #fff;
+  font-weight: 700;
+  text-transform: uppercase;
+  animation: fadeIn 2s ease-in-out;
+}
+
+.title-line {
+  font-size: 3rem;
+  font-weight: bold;
+  margin-bottom: 20px;
+  color: #fff;
+  text-shadow: 0 0 10px rgba(255, 255, 255, 0.7),
+               0 0 20px rgba(255, 255, 255, 0.6),
+               0 0 30px rgba(255, 255, 255, 0.5);
+}
+
+/* Subtitle */
+.subtitle {
+  font-size: 1.8rem;
+  color: #fff;
+  font-weight: 300;
+  margin: 10px 0 30px;
+}
+
+/* CTA Links */
+.cta-links {
+  display: flex;
+  gap: 20px;
+  justify-content: center;
+}
+
+.cta-link {
+  font-size: 1.5rem;
+  color: #ebe7e6;
+  text-decoration: none;
+  padding: 12px 25px;
+  border-radius: 30px;
+  background-color: transparent;
+  border: 2px solid #dfe492;
+  margin-top: 20px;
+  transition: all 0.3s ease;
+}
+
+.cta-link:hover {
+  background-color: #f3e3e2;
+  color: white;
+  box-shadow: 0 4px 15px rgba(255, 111, 97, 0.3);
+}
+
+/* Section Styles */
 .section {
+  padding: 80px 20px;
+  text-align: center;
+  background-color: #222;
+  border-radius: 8px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.6);
   margin-bottom: 40px;
+  transition: all 0.3s ease-in-out;
+}
+
+.section:hover {
+  transform: translateY(-10px);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.7);
+  background-color: #444;
+}
+
+.about, .blog {
+  background-color: #333;
 }
 
 .section h2 {
-  font-size: 2rem;
-  margin-top: 20px;
+  font-size: 2.5rem;
   margin-bottom: 20px;
+  color: #FF6F61;
   text-transform: uppercase;
   letter-spacing: 2px;
 }
 
+/* Lists */
+ul {
+  list-style: none;
+  padding-left: 0;
+}
+
+ul li {
+  font-size: 1.2rem;
+  margin: 15px 0;
+  transition: color 0.3s ease-in-out;
+}
+
+ul li a {
+  color: #FF6F61;
+  text-decoration: none;
+  transition: color 0.3s ease-in-out;
+}
+
+ul li a:hover {
+  color: #fff;
+  text-decoration: underline;
+}
+
+/* Skills Table */
 .skills-table {
   width: 100%;
   margin-top: 20px;
   border-collapse: collapse;
 }
 
-.skills-table th, .skills-table td {
+.skills-table th,
+.skills-table td {
   padding: 10px;
   text-align: left;
   border: 1px solid #fff;
@@ -321,8 +226,35 @@ h1, h2 {
   background-color: #444;
 }
 
+/* Animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes pulse {
+  0%   { transform: scale(1); opacity: 0.8; }
+  50%  { transform: scale(1.2); opacity: 1; }
+  100% { transform: scale(1); opacity: 0.8; }
+}
+
+.star {
+  animation: pulse 1.5s infinite;
+  display: inline-block;
+}
+
+/* Footer */
 footer {
   background-color: #1b1b1b;
   padding: 20px;
   text-align: center;
+  color: #fff;
+}
+
+footer p {
+  font-size: 1rem;
 }
