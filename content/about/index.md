@@ -8,6 +8,7 @@ type: "page"
 
 I'm a **Cloud Solution Architect** with deep expertise in **Azure Kubernetes Service (AKS)**, **DevOps**, and **cloud-native modernization**. With over a decade of experience, I specialize in guiding enterprises through their digital transformation journeys — from legacy migration to scalable, secure, cloud-first systems.
 
+![Tara Bhushan][def]
 ---
 
 ### 💼 Professional Snapshot
@@ -49,3 +50,6 @@ Feel free to reach out or follow my work:
 ---
 
 Thanks for stopping by! 🙏
+
+
+[def]: images/tara_bhushan.jpg
