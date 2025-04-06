@@ -5,24 +5,74 @@
     box-sizing: border-box;
   }
   body {
-    font-family: 'Arial', sans-serif;
-    background-color: #1b1b1b;
-    color: white;
-    overflow-x: hidden;
-    height: 100%;
+    background: #0d0d0d; /* Dark base */
+    overflow: hidden;
+    position: relative;
   }
   
-  /* Fullscreen Header */
+  .glow-container {
+    position: fixed;
+    width: 100vw;
+    height: 100vh;
+    top: 0;
+    left: 0;
+    z-index: -1;
+    pointer-events: none;
+  }
+  
+  .glow-circle {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(100px);
+    opacity: 0.6;
+    animation: float 10s ease-in-out infinite alternate;
+  }
+  
+  /* You can add multiple colors with different sizes and positions */
+  .glow-one {
+    width: 400px;
+    height: 400px;
+    background: rgba(0, 255, 255, 0.5); /* Cyan glow */
+    top: 10%;
+    left: 15%;
+  }
+  
+  .glow-two {
+    width: 300px;
+    height: 300px;
+    background: rgba(255, 0, 255, 0.5); /* Magenta glow */
+    bottom: 20%;
+    right: 10%;
+  }
+  
+  .glow-three {
+    width: 250px;
+    height: 250px;
+    background: rgba(255, 255, 0, 0.4); /* Yellow glow */
+    top: 50%;
+    left: 60%;
+  }
+  
+  @keyframes float {
+    0% {
+      transform: translateY(0px) translateX(0px);
+    }
+    100% {
+      transform: translateY(-20px) translateX(20px);
+    }
+  }   
   header {
     height: 100vh;
-    background: url('path_to_your_artistic_image.jpg') no-repeat center center/cover;
+    /* background: url('path_to_your_artistic_image.jpg') no-repeat center center/cover; */
     display: flex;
     justify-content: center;
     align-items: center;
     text-align: center;
+    flex-direction: column;  /* Stacks items vertically */
     position: relative;
+    background: transparent;
   }
-  
+
   .container {
     max-width: 1200px;
     margin: 0 20px;
@@ -41,12 +91,13 @@
     font-size: 1.8rem;
     color: #fff;
     font-weight: 300;
-    margin: 10px 0 30px;
+    margin: 10px 0 30px;  /* Adds spacing between subtitle and CTA links */
   }
   
   .cta-links {
     display: flex;
     gap: 20px;
+    justify-content: center; /* Centers the links */
   }
   
   .cta-link {
@@ -121,11 +172,14 @@
     }
   }
 
-.title-line {
-  font-size: 3rem;
-  font-weight: bold;
-  font-family: 'Segoe UI', sans-serif;
-}
+  .title-line {
+    font-size: 3rem;
+    font-weight: bold;
+    font-family: 'Segoe UI', sans-serif;
+    margin-bottom: 20px;  /* Adds space below the title */
+    color: #fff;  /* Sets the text color to white */
+    text-shadow: 0 0 10px rgba(255, 255, 255, 0.7), 0 0 20px rgba(255, 255, 255, 0.6), 0 0 30px rgba(255, 255, 255, 0.5); /* Adds glowing effect */
+  }
 
 .star {
   animation: pulse 1.5s infinite;
@@ -137,5 +191,10 @@
   50%  { transform: scale(1.2); opacity: 1; }
   100% { transform: scale(1); opacity: 0.8; }
 }
-  
+
+.main-content {
+  position: relative;
+  z-index: 1;
+  padding-top: 2rem;
+}
   
