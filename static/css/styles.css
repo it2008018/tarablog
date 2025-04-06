@@ -100,7 +100,7 @@
     justify-content: center; /* Centers the links */
   }
   
-  .cta-link {
+ /* .cta-link {
     font-size: 1.5rem;
     color: #FF6F61;
     text-decoration: none;
@@ -115,39 +115,76 @@
     color: white;
     box-shadow: 0 4px 15px rgba(255, 111, 97, 0.3);
   }
-  
+  */
   /* Section Styles */
   .section {
-    padding: 50px 20px;
+    padding: 80px 20px; /* Add extra padding for better spacing */
     text-align: center;
+    background-color: #222;
+    border-radius: 8px; /* Add rounded corners for a softer look */
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.6); /* Add subtle shadow for depth */
+    margin-bottom: 40px; /* Add space between sections */
+    transition: all 0.3s ease-in-out; /* Smooth transition for hover effect */
   }
   
   .about, .blog {
-    background-color: #222;
+    background-color: #333; /* Darken background for contrast */
   }
   
   h2 {
     font-size: 2.5rem;
     margin-bottom: 20px;
+    color: #FF6F61; /* Add a vibrant color to the heading */
+    text-transform: uppercase;
+    letter-spacing: 2px;
   }
   
   ul {
     list-style: none;
+    padding-left: 0;
   }
   
   ul li {
     font-size: 1.2rem;
-    margin: 10px 0;
+    margin: 15px 0;
+    transition: color 0.3s ease-in-out; /* Smooth color transition for hover effect */
   }
   
   ul li a {
-    color: #FF6F61;
+    color: #FF6F61; /* Link color matching the section title */
     text-decoration: none;
-    transition: color 0.3s ease;
+    transition: color 0.3s ease-in-out;
   }
   
   ul li a:hover {
+    color: #fff; /* Change link color on hover */
+    text-decoration: underline;
+  }
+  
+  /* Add hover effect on the whole section */
+  .section:hover {
+    transform: translateY(-10px); /* Lift the section on hover */
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.7); /* Intensify shadow on hover */
+    background-color: #444; /* Lighten the background on hover */
+  }
+  
+  /* Add some padding and a border to the 'Learn More' button */
+  .cta-link {
+    font-size: 1.5rem;
+    color: #ebe7e6;
+    text-decoration: none;
+    padding: 12px 25px;
+    border-radius: 30px;
+    background-color: transparent;
+    border: 2px solid #dfe492;
+    margin-top: 20px;
+    transition: all 0.3s ease;
+  }
+  
+  .cta-link:hover {
+    background-color: #f3e3e2;
     color: white;
+    box-shadow: 0 4px 15px rgba(255, 111, 97, 0.3);
   }
   
   /* Footer Styles */
