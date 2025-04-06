@@ -6,7 +6,7 @@ type: "page"
 
 ## 👋 Hey there, I’m Tara Bhushan
 
-<img src="/images/tara_bhushan.jpg" alt="Tara Bhushan" style="width: 150px; height: 150px; border-radius: 50%; position: absolute; top: 20px; right: 20px;">
+<img src="/static/images/tara_bhushan.jpg" alt="Tara Bhushan" style="width: 150px; height: 150px; border-radius: 50%; position: absolute; top: 20px; right: 20px;">
 
 I'm a **Cloud Solution Architect** with deep expertise in **Azure Kubernetes Service (AKS)**, **DevOps**, and **cloud-native modernization**. 
 <div style="margin-top: 10px;">
