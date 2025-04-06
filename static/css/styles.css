@@ -10,6 +10,15 @@
     position: relative;
   }
   
+  .profile-image {
+    width: 120px;         /* Set a fixed width */
+    height: 120px;        /* Set a fixed height */
+    border-radius: 50%;   /* Make the image circular */
+    object-fit: cover;    /* Ensures the image fills the circle without distortion */
+    border: 3px solid #fff; /* Optional: Adds a white border around the image */
+    display: block;       /* Ensures it's treated as a block element */
+    margin: 20px auto;    /* Centers the image */
+  }
   .glow-container {
     position: fixed;
     width: 100vw;
@@ -234,4 +243,3 @@
   z-index: 1;
   padding-top: 2rem;
 }
-  

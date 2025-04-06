@@ -6,9 +6,12 @@ type: "page"
 
 ## 👋 Hey there, I’m Tara Bhushan
 
-I'm a **Cloud Solution Architect** with deep expertise in **Azure Kubernetes Service (AKS)**, **DevOps**, and **cloud-native modernization**. With over a decade of experience, I specialize in guiding enterprises through their digital transformation journeys — from legacy migration to scalable, secure, cloud-first systems.
+<img src="/images/tara_bhushan.jpg" alt="Tara Bhushan" style="width: 150px; height: 150px; border-radius: 50%; position: absolute; top: 20px; right: 20px;">
 
-![Tara Bhushan][def]
+I'm a **Cloud Solution Architect** with deep expertise in **Azure Kubernetes Service (AKS)**, **DevOps**, and **cloud-native modernization**. 
+<div style="margin-top: 10px;">
+With over a decade of experience, I specialize in guiding enterprises through their digital transformation journeys — from legacy migration to scalable, secure, cloud-first systems.
+
 ---
 
 ### 💼 Professional Snapshot
@@ -23,9 +26,9 @@ I'm a **Cloud Solution Architect** with deep expertise in **Azure Kubernetes Ser
 ### 🧠 Skills
 
 | Cloud & Infra  | DevOps & Tools  | Languages       | Soft Skills           |
-|----------------|------------------|------------------|------------------------|
-| Azure, AKS     | ArgoCD, Terraform | C#, Python, YAML | Mentorship, Strategy  |
-| KEDA, Istio    | GitHub Actions    | Bash, JavaScript | Stakeholder alignment |
+|----------------|-----------------|-----------------|-----------------------|
+| Azure, AKS     | ArgoCD, Terraform| C#, Python, YAML| Mentorship, Strategy  |
+| KEDA, Istio    | GitHub Actions  | Bash, JavaScript| Stakeholder alignment |
 
 ---
 
@@ -50,6 +53,3 @@ Feel free to reach out or follow my work:
 ---
 
 Thanks for stopping by! 🙏
-
-
-[def]: images/tara_bhushan.jpg
