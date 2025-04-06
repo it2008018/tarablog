@@ -5,7 +5,106 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
   <title>About Me</title>
-  <link rel="stylesheet" href="{{ "css/styles.css" | relURL }}">
+  <style>
+    /* Global Styles */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      background: #0d0d0d; /* Dark base */
+      font-family: Arial, sans-serif;
+      color: #fff;
+      overflow: auto;  /* Allow scrolling */
+    }
+
+    h1, h2 {
+      color: #eadddc;
+    }
+
+    .container {
+      display: flex;
+      flex-direction: column;
+      padding: 50px;
+      max-width: 900px;
+      margin: 0 auto;
+      position: relative;
+    }
+
+    .header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 10px;
+    }
+
+    .profile-image {
+      width: 150px;
+      height: 150px;
+      border-radius: 50%;
+      border: 3px solid #fff;
+      object-fit: cover;
+    }
+
+    .content {
+      margin-top: 5px; /* Reduced to bring the content closer */
+    }
+
+    .section {
+      margin-bottom: 40px;
+    }
+
+    .section h2 {
+      font-size: 2rem;
+      margin-top: 20px;
+      margin-bottom: 20px;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+    }
+
+    .skills-table {
+      width: 100%;
+      margin-top: 20px;
+      border-collapse: collapse;
+    }
+
+    .skills-table th, .skills-table td {
+      padding: 10px;
+      text-align: left;
+      border: 1px solid #fff;
+    }
+
+    .skills-table th {
+      background-color: #333;
+    }
+
+    .skills-table td {
+      background-color: #444;
+    }
+
+    .cta-links {
+      margin-top: 20px;
+    }
+
+    .cta-links a {
+      color: #f2ebea;
+      text-decoration: none;
+      margin-right: 20px;
+      font-size: 1.2rem;
+    }
+
+    .cta-links a:hover {
+      text-decoration: underline;
+    }
+
+    footer {
+      background-color: #1b1b1b;
+      padding: 20px;
+      text-align: center;
+    }
+  </style>
 </head>
 <body>
 
