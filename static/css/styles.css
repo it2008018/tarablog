@@ -32,7 +32,7 @@
   .glow-one {
     width: 400px;
     height: 400px;
-    background: rgba(0, 255, 255, 0.5); /* Cyan glow */
+    background: rgba(255, 0, 183, 0.5); /* Cyan glow */
     top: 10%;
     left: 15%;
   }
@@ -40,7 +40,7 @@
   .glow-two {
     width: 300px;
     height: 300px;
-    background: rgba(255, 0, 255, 0.5); /* Magenta glow */
+    background: rgba(206, 174, 211, 0.468); /* Magenta glow */
     bottom: 20%;
     right: 10%;
   }
