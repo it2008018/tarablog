@@ -3,17 +3,48 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>{{ .Site.Title }}</title>
+  <title>Tara Bhushan's Blog</title>
+  <link rel="stylesheet" href="{{ "css/styles.css" | relURL }}">
 </head>
 <body>
   <header>
-    <h1>{{ .Site.Title }}</h1>
+    <div class="container">
+      <div class="content">
+        <h1 class="title-line">ALT + CTRL + <span class="star">⭐</span></h1>
+        <p class="subtitle">Exploring the Intersection of Technology, Career, and Life</p>
+        <div class="cta-links">
+          <a href="about" class="cta-link">About Me</a>
+          <a href="blog" class="cta-link">My Blog</a>
+        </div>
+      </div>
+    </div>
   </header>
-  <main>
-    <section>
-      <h2>Welcome to my blog</h2>
-      <p>This is my personal blog. Feel free to explore!</p>
-    </section>
-  </main>
+
+  <!-- About Section -->
+  <section id="about" class="section about">
+    <div class="content">
+      <h2>About Me</h2>
+      <p>I'm a technology enthusiast, working with cutting-edge innovations to solve complex problems. My journey spans across tech careers, cloud computing, and modern architecture. Join me as I share my thoughts, tips, and advice!</p>
+      <a href="/about" class="cta-link">Learn More</a>
+    </div>
+  </section>
+
+  <!-- Blog Section -->
+  <section id="blog" class="section blog">
+    <div class="content">
+      <h2>Latest Posts</h2>
+      <ul>
+        <li><a href="/blog/post1">How to Ace Your IT Career</a></li>
+        <li><a href="/blog/post2">The Future of Cloud Computing</a></li>
+        <li><a href="/blog/post3">5 Ways to Stay Updated in Tech</a></li>
+      </ul>
+    </div>
+  </section>
+
+  <footer>
+    <div class="content">
+      <p>&copy; 2025 Tara Bhushan. All rights reserved.</p>
+    </div>
+  </footer>
 </body>
 </html>

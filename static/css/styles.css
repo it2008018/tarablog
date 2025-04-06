@@ -1,0 +1,141 @@
+/* Global Styles */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+  body {
+    font-family: 'Arial', sans-serif;
+    background-color: #1b1b1b;
+    color: white;
+    overflow-x: hidden;
+    height: 100%;
+  }
+  
+  /* Fullscreen Header */
+  header {
+    height: 100vh;
+    background: url('path_to_your_artistic_image.jpg') no-repeat center center/cover;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    position: relative;
+  }
+  
+  .container {
+    max-width: 1200px;
+    margin: 0 20px;
+  }
+  
+  .title {
+    font-size: 4.5rem;
+    letter-spacing: 1px;
+    color: #fff;
+    font-weight: 700;
+    text-transform: uppercase;
+    animation: fadeIn 2s ease-in-out;
+  }
+  
+  .subtitle {
+    font-size: 1.8rem;
+    color: #fff;
+    font-weight: 300;
+    margin: 10px 0 30px;
+  }
+  
+  .cta-links {
+    display: flex;
+    gap: 20px;
+  }
+  
+  .cta-link {
+    font-size: 1.5rem;
+    color: #FF6F61;
+    text-decoration: none;
+    padding: 10px 20px;
+    border-radius: 30px;
+    background-color: transparent;
+    transition: all 0.3s ease;
+  }
+  
+  .cta-link:hover {
+    background-color: #FF6F61;
+    color: white;
+    box-shadow: 0 4px 15px rgba(255, 111, 97, 0.3);
+  }
+  
+  /* Section Styles */
+  .section {
+    padding: 50px 20px;
+    text-align: center;
+  }
+  
+  .about, .blog {
+    background-color: #222;
+  }
+  
+  h2 {
+    font-size: 2.5rem;
+    margin-bottom: 20px;
+  }
+  
+  ul {
+    list-style: none;
+  }
+  
+  ul li {
+    font-size: 1.2rem;
+    margin: 10px 0;
+  }
+  
+  ul li a {
+    color: #FF6F61;
+    text-decoration: none;
+    transition: color 0.3s ease;
+  }
+  
+  ul li a:hover {
+    color: white;
+  }
+  
+  /* Footer Styles */
+  footer {
+    background-color: #1b1b1b;
+    padding: 20px;
+    text-align: center;
+    color: #fff;
+  }
+  
+  footer p {
+    font-size: 1rem;
+  }
+  
+  /* Animation */
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+.title-line {
+  font-size: 3rem;
+  font-weight: bold;
+  font-family: 'Segoe UI', sans-serif;
+}
+
+.star {
+  animation: pulse 1.5s infinite;
+  display: inline-block;
+}
+
+@keyframes pulse {
+  0%   { transform: scale(1); opacity: 0.8; }
+  50%  { transform: scale(1.2); opacity: 1; }
+  100% { transform: scale(1); opacity: 0.8; }
+}
+  
+  
