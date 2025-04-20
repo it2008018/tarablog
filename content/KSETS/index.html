@@ -8,9 +8,22 @@
     body {
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       background: url('https://raw.githubusercontent.com/it2008018/tarablog/main/static/images/AKS1.jpeg') no-repeat center center fixed;
-      color: #e2e8f0; /* Light text */
+      background-size: cover;
+      color: #e2e8f0;
       margin: 0;
       padding: 2rem;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: inherit;
+      filter: blur(8px);
+      z-index: -1;
     }
 
     h1, h2, h3 {
@@ -32,8 +45,9 @@
     }
 
     th {
-      background-color: #0ea5e9;
+      background-color: rgba(14, 165, 233, 0.7);
       color: #fff;
+      text-align: center;
     }
 
     tr:nth-child(even) {
@@ -47,22 +61,51 @@
     .container {
       max-width: 1200px;
       margin: auto;
+      position: relative;
+      z-index: 1;
+      background-color: rgba(30, 41, 59, 0.8);
+      padding: 2rem;
+      border-radius: 1rem;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.4);
     }
 
-    .footer {
-      margin-top: 3rem;
+    .ribbon {
+      background-color: rgba(14, 165, 233, 0.3);
       text-align: center;
-      font-size: 0.9rem;
-      color: #94a3b8;
+      border-left: 6px solid #0ea5e9;
+      padding: 1rem 2rem;
+      margin-bottom: 2rem;
+      border-radius: 0.5rem;
+    }
+
+    footer {
+      background-color: rgba(14, 165, 233, 0.3);
+      border-left: 6px solid #0ea5e9;
+      padding: 0.1rem 0.1rem;
+      text-align: center;
+      margin-bottom: 2rem;
+      border-radius: 0.5rem;
+    }
+
+    ul {
+      list-style: disc;
+      padding-left: 2rem;
+    }
+
+    .note {
+      background-color: #0f172a;
+      padding: 1rem;
+      border-left: 4px solid #3b82f6;
+      margin-bottom: 2rem;
     }
   </style>
 </head>
 <body>
   <div class="container">
-    <h1>📘 Kubernetes Workload Types – A Simple Comparison Guide</h1>
-    <p>Choosing the right Kubernetes controller is key to successful application deployment. Here's a quick comparison to guide your decision-making.</p>
-
-    <h2>🔁 Kubernetes Workload Types and Patterns – Quick Comparison</h2>
+    <div class="ribbon">
+      <h1>📘 Kubernetes Workload Types – A Simple Comparison Guide 📘</h1>
+      <p>Choosing the right Kubernetes controller is key to successful application deployment. Here's a quick comparison to guide your decision-making.</p>
+    </div>
 
     <table>
       <thead>
@@ -183,6 +226,18 @@
       </tbody>
     </table>
 
+    <h3>Design Considerations Before Choosing a Workload</h3>
+    <ul>
+      <li><strong>Pod Identity:</strong> Do pods need a stable identity (like in StatefulSets) or are they interchangeable (like in Deployments)?</li>
+      <li><strong>State Persistence:</strong> Will the workload require persistent storage, or is it ephemeral in nature?</li>
+      <li><strong>Scalability:</strong> Will it need to scale automatically based on load or metrics?</li>
+      <li><strong>Startup Requirements:</strong> Does the application need any setup steps before starting the main container?</li>
+      <li><strong>Scheduling Pattern:</strong> Is the task a long-running service or a scheduled/one-time job?</li>
+      <li><strong>Node Affinity:</strong> Should the workload be deployed on every node (e.g., DaemonSets)?</li>
+      <li><strong>Resource Tuning:</strong> Is vertical or horizontal pod autoscaling required?</li>
+      <li><strong>Lifecycle Management:</strong> Do you need declarative updates and rollbacks (Deployments), or precise ordering (StatefulSets)?</li>
+    </ul>
+
     <h3>Quick Recommendations</h3>
     <ul>
       <li><strong>Deployment:</strong> For most stateless, scalable applications</li>
@@ -192,9 +247,11 @@
       <li><strong>Sidecar:</strong> For shared functionality like proxying or observability</li>
       <li><strong>Init Container:</strong> For setup or preparation logic</li>
     </ul>
+    <footer>
+      <div class="content">
+        <p>&copy; 2025 Tara Bhushan. All rights reserved.</p>
+      </div>
+    </footer>
   </div>
-  <footer>
-    <p>© 2025 Tara Bhushan. All rights reserved.</p>
-  </footer>
 </body>
 </html>
