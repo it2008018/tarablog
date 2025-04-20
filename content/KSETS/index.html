@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kubernetes Workload Types Comparison</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: url('https://raw.githubusercontent.com/it2008018/tarablog/main/static/images/AKS1.jpeg') no-repeat center center fixed;
+      color: #e2e8f0; /* Light text */
+      margin: 0;
+      padding: 2rem;
+    }
+
+    h1, h2, h3 {
+      color: #60a5fa;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 2rem 0;
+      background-color: #1e293b;
+      box-shadow: 0 0 10px rgba(0,0,0,0.5);
+    }
+
+    th, td {
+      border: 1px solid #334155;
+      padding: 1rem;
+      text-align: left;
+    }
+
+    th {
+      background-color: #0ea5e9;
+      color: #fff;
+    }
+
+    tr:nth-child(even) {
+      background-color: #1e293b;
+    }
+
+    tr:nth-child(odd) {
+      background-color: #273449;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: auto;
+    }
+
+    .footer {
+      margin-top: 3rem;
+      text-align: center;
+      font-size: 0.9rem;
+      color: #94a3b8;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>📘 Kubernetes Workload Types – A Simple Comparison Guide</h1>
+    <p>Choosing the right Kubernetes controller is key to successful application deployment. Here's a quick comparison to guide your decision-making.</p>
+
+    <h2>🔁 Kubernetes Workload Types and Patterns – Quick Comparison</h2>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Type / Pattern</th>
+          <th>Purpose</th>
+          <th>Pod Identity</th>
+          <th>Scaling</th>
+          <th>Use Case</th>
+          <th>Example</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Pod</td>
+          <td>Smallest deployable unit</td>
+          <td>Ephemeral</td>
+          <td>Not self-managed</td>
+          <td>Debugging, simple single-run jobs</td>
+          <td>Run a one-time script</td>
+        </tr>
+        <tr>
+          <td>ReplicaSet</td>
+          <td>Maintain a stable set of identical pods</td>
+          <td>Ephemeral</td>
+          <td>Automatic (based on replicas)</td>
+          <td>Stateless apps</td>
+          <td>Web frontend</td>
+        </tr>
+        <tr>
+          <td>Deployment</td>
+          <td>Declarative update of ReplicaSets</td>
+          <td>Ephemeral</td>
+          <td>Manual or HPA</td>
+          <td>Rolling updates, rollback</td>
+          <td>APIs, UI apps</td>
+        </tr>
+        <tr>
+          <td>StatefulSet</td>
+          <td>Stable IDs and persistent storage</td>
+          <td>Stable</td>
+          <td>Manual or HPA</td>
+          <td>Stateful apps like databases</td>
+          <td>Cassandra, Kafka</td>
+        </tr>
+        <tr>
+          <td>DaemonSet</td>
+          <td>Run one pod per node</td>
+          <td>Tied to nodes</td>
+          <td>One per node</td>
+          <td>Node-level agents</td>
+          <td>Fluentd, Node Exporter</td>
+        </tr>
+        <tr>
+          <td>Job</td>
+          <td>Run pod(s) until successful</td>
+          <td>Ephemeral</td>
+          <td>N/A</td>
+          <td>One-off batch jobs</td>
+          <td>Data migration</td>
+        </tr>
+        <tr>
+          <td>CronJob</td>
+          <td>Scheduled Jobs</td>
+          <td>Ephemeral</td>
+          <td>N/A</td>
+          <td>Time-based batch jobs</td>
+          <td>Daily backups</td>
+        </tr>
+        <tr>
+          <td>Sidecar</td>
+          <td>Helper container in a pod</td>
+          <td>Shared</td>
+          <td>With main container</td>
+          <td>Logging, proxy, Dapr</td>
+          <td>Envoy, Dapr</td>
+        </tr>
+        <tr>
+          <td>Init Container</td>
+          <td>Run before main app container</td>
+          <td>Runs once</td>
+          <td>N/A</td>
+          <td>Pre-setup logic</td>
+          <td>DB migration before app start</td>
+        </tr>
+        <tr>
+          <td>Service</td>
+          <td>Network access to pods</td>
+          <td>Fronts pods</td>
+          <td>N/A</td>
+          <td>Load balancing, communication</td>
+          <td>ClusterIP, NodePort</td>
+        </tr>
+        <tr>
+          <td>HPA</td>
+          <td>Auto-scale pods</td>
+          <td>Depends on metrics</td>
+          <td>Dynamic</td>
+          <td>Varying load patterns</td>
+          <td>Scale web frontend</td>
+        </tr>
+        <tr>
+          <td>VPA</td>
+          <td>Auto-adjust resource requests</td>
+          <td>Dynamic</td>
+          <td>N/A</td>
+          <td>Optimize usage</td>
+          <td>ML jobs</td>
+        </tr>
+        <tr>
+          <td>Job Controller</td>
+          <td>Manages batch jobs</td>
+          <td>Ephemeral</td>
+          <td>N/A</td>
+          <td>Task completion</td>
+          <td>Report generation</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h3>Quick Recommendations</h3>
+    <ul>
+      <li><strong>Deployment:</strong> For most stateless, scalable applications</li>
+      <li><strong>StatefulSet:</strong> For databases or apps requiring persistence</li>
+      <li><strong>DaemonSet:</strong> For node-level operations/logging</li>
+      <li><strong>Job/CronJob:</strong> For one-off or scheduled batch tasks</li>
+      <li><strong>Sidecar:</strong> For shared functionality like proxying or observability</li>
+      <li><strong>Init Container:</strong> For setup or preparation logic</li>
+    </ul>
+  </div>
+  <footer>
+    <p>© 2025 Tara Bhushan. All rights reserved.</p>
+  </footer>
+</body>
+</html>
