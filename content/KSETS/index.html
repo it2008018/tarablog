@@ -121,109 +121,109 @@
       <tbody>
         <tr>
           <td>Pod</td>
-          <td>Smallest deployable unit</td>
+          <td>Smallest deployable unit representing a single instance of a containerized app</td>
           <td>Ephemeral</td>
           <td>Not self-managed</td>
-          <td>Debugging, simple single-run jobs</td>
-          <td>Run a one-time script</td>
+          <td>Ad-hoc testing or one-off utility execution</td>
+          <td>Run a .NET CLI command to test a legacy service migration in isolation</td>
         </tr>
         <tr>
           <td>ReplicaSet</td>
-          <td>Maintain a stable set of identical pods</td>
+          <td>Maintains a fixed number of pod replicas for high availability</td>
           <td>Ephemeral</td>
           <td>Automatic (based on replicas)</td>
-          <td>Stateless apps</td>
-          <td>Web frontend</td>
+          <td>Ensures multiple instances of stateless services remain available</td>
+          <td>Ensure 3 instances of a .NET microservice for invoice processing are always running</td>
         </tr>
         <tr>
           <td>Deployment</td>
-          <td>Declarative update of ReplicaSets</td>
+          <td>Manages rolling updates, scaling, and rollback for stateless applications</td>
           <td>Ephemeral</td>
-          <td>Manual or HPA</td>
-          <td>Rolling updates, rollback</td>
-          <td>APIs, UI apps</td>
+          <td>Manual or via HPA</td>
+          <td>Ideal for microservices needing frequent updates and scalability</td>
+          <td>Deploy a .NET Core customer service with zero downtime during upgrades</td>
         </tr>
         <tr>
           <td>StatefulSet</td>
-          <td>Stable IDs and persistent storage</td>
+          <td>Supports stateful apps requiring stable identities and persistent storage</td>
           <td>Stable</td>
           <td>Manual or HPA</td>
-          <td>Stateful apps like databases</td>
-          <td>Cassandra, Kafka</td>
+          <td>Best for microservices with ordered startup and volume claims</td>
+          <td>Host a .NET-based order tracking system that requires sticky sessions and persistence</td>
         </tr>
         <tr>
           <td>DaemonSet</td>
-          <td>Run one pod per node</td>
+          <td>Ensures that a pod runs on all (or selected) nodes</td>
           <td>Tied to nodes</td>
           <td>One per node</td>
-          <td>Node-level agents</td>
-          <td>Fluentd, Node Exporter</td>
+          <td>Used for logging, monitoring, or security agents across cluster nodes</td>
+          <td>Deploy a .NET agent to collect metrics/logs from each node during app modernization</td>
         </tr>
         <tr>
           <td>Job</td>
-          <td>Run pod(s) until successful</td>
+          <td>Runs pods until a task completes successfully</td>
           <td>Ephemeral</td>
           <td>N/A</td>
-          <td>One-off batch jobs</td>
-          <td>Data migration</td>
+          <td>Perfect for migration scripts or backend processing tasks</td>
+          <td>Trigger a .NET Core migration script to convert monolith DB schemas</td>
         </tr>
         <tr>
           <td>CronJob</td>
-          <td>Scheduled Jobs</td>
+          <td>Runs scheduled Jobs at specific time intervals</td>
           <td>Ephemeral</td>
           <td>N/A</td>
-          <td>Time-based batch jobs</td>
-          <td>Daily backups</td>
+          <td>Ideal for recurring batch processes in a modernized pipeline</td>
+          <td>Run a scheduled .NET Core job for nightly report generation or cleanup tasks</td>
         </tr>
         <tr>
           <td>Sidecar</td>
-          <td>Helper container in a pod</td>
+          <td>Runs with the main app container, extending its capabilities</td>
           <td>Shared</td>
           <td>With main container</td>
-          <td>Logging, proxy, Dapr</td>
-          <td>Envoy, Dapr</td>
+          <td>Used for service mesh, configuration reloads, and observability</td>
+          <td>Use Dapr as a sidecar to a .NET microservice for state management or pub/sub integration</td>
         </tr>
         <tr>
           <td>Init Container</td>
-          <td>Run before main app container</td>
+          <td>Runs before the main app to prepare the environment</td>
           <td>Runs once</td>
           <td>N/A</td>
-          <td>Pre-setup logic</td>
-          <td>DB migration before app start</td>
+          <td>Helps decouple setup logic from the main service logic</td>
+          <td>Run a .NET tool to apply Entity Framework DB migrations before a microservice starts</td>
         </tr>
         <tr>
           <td>Service</td>
-          <td>Network access to pods</td>
+          <td>Exposes a group of pods as a stable network endpoint</td>
           <td>Fronts pods</td>
           <td>N/A</td>
-          <td>Load balancing, communication</td>
-          <td>ClusterIP, NodePort</td>
+          <td>Handles internal and external traffic routing</td>
+          <td>Expose a .NET monolith or microservice as a ClusterIP for internal APIs or LoadBalancer for public APIs</td>
         </tr>
         <tr>
           <td>HPA</td>
-          <td>Auto-scale pods</td>
+          <td>Scales pods horizontally based on real-time metrics</td>
           <td>Depends on metrics</td>
           <td>Dynamic</td>
-          <td>Varying load patterns</td>
-          <td>Scale web frontend</td>
+          <td>Optimizes performance for fluctuating workloads</td>
+          <td>Auto-scale a .NET product catalog microservice during peak user activity</td>
         </tr>
         <tr>
           <td>VPA</td>
-          <td>Auto-adjust resource requests</td>
+          <td>Dynamically adjusts resource requests based on usage</td>
           <td>Dynamic</td>
           <td>N/A</td>
-          <td>Optimize usage</td>
-          <td>ML jobs</td>
+          <td>Optimizes resource consumption for consistent workloads</td>
+          <td>Tune memory and CPU for a .NET payment processing service running consistently under load</td>
         </tr>
         <tr>
           <td>Job Controller</td>
-          <td>Manages batch jobs</td>
+          <td>Orchestrates execution and retries of multiple Jobs</td>
           <td>Ephemeral</td>
           <td>N/A</td>
-          <td>Task completion</td>
-          <td>Report generation</td>
+          <td>Enables batch job orchestration and error handling</td>
+          <td>Run and monitor multiple .NET batch jobs for ETL during migration from a legacy data warehouse</td>
         </tr>
-      </tbody>
+      </tbody>            
     </table>
 
     <h3>Design Considerations Before Choosing a Workload</h3>
