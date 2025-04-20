@@ -62,10 +62,9 @@
       width: 100%;
       overflow-x: auto;
       -webkit-overflow-scrolling: touch;
-      margin: 2rem 0;
+      margin: auto;
       border-radius: 0.5rem;
       max-width: 1200px;
-      margin: auto;
       position: relative;
       z-index: 1;
       background-color: rgba(30, 41, 59, 0.8);
@@ -103,6 +102,16 @@
       border-left: 4px solid #3b82f6;
       margin-bottom: 2rem;
     }
+    .table-scroll {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  margin-top: 2rem;
+  border-radius: 0.5rem;
+}
+
+.table-scroll table {
+  min-width: 800px; /* or wider if needed */
+}
   </style>
 </head>
 <body>
@@ -111,7 +120,7 @@
       <h1>📘 Kubernetes Workload Types – A Simple Comparison Guide 📘</h1>
       <p>Choosing the right Kubernetes controller is key to successful application deployment. Here's a quick comparison to guide your decision-making.</p>
     </div>
-
+    <div class="table-scroll">
     <table>
       <thead>
         <tr>
@@ -230,7 +239,7 @@
         </tr>
       </tbody>            
     </table>
-
+  </div>
     <h3>Design Considerations Before Choosing a Workload</h3>
     <ul>
       <li><strong>Pod Identity:</strong> Do pods need a stable identity (like in StatefulSets) or are they interchangeable (like in Deployments)?</li>
