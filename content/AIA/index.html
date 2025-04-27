@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!DOCTYPE html> 
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -11,10 +11,18 @@
     <style>
         body {
             font-family: 'Roboto', sans-serif;
+            background: url('https://raw.githubusercontent.com/it2008018/tarablog/main/static/images/cls_bg.jpeg') no-repeat center center fixed;
             line-height: 1.6;
             margin: 0;
             padding: 0;
-            background: linear-gradient(to right, #ece9e6, #ffffff);
+        }
+        footer {
+          text-align: center;
+          padding: 2rem 1rem;
+          font-size: 0.9rem;
+          background-color: rgba(255, 240, 245, 0.7);
+          border-top: 3px dashed #a45a52;
+          margin-top: 3rem;
         }
         .header {
             background: url('https://raw.githubusercontent.com/it2008018/tarablog/main/static/images/House_landscape.png') no-repeat center center/cover;
@@ -58,6 +66,47 @@
             margin-left: 20px;
             color: #555;
         }
+
+        .slideshow {
+            position: relative;
+            width: 100%;
+            overflow: hidden;
+        }
+
+        .slides {
+            display: flex;
+            transition: transform 0.5s ease;
+        }
+
+        .slides img {
+            width: 100%;
+            height: auto;
+            max-height: 600px;
+            object-fit: cover;
+        }
+
+        .navigation-manual {
+            position: absolute;
+            top: 50%;
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            transform: translateY(-50%);
+        }
+
+        .manual-btn {
+            width: 15px;
+            height: 15px;
+            margin: 0 10px;
+            border-radius: 50%;
+            background-color: #fff;
+            border: 2px solid #333;
+            cursor: pointer;
+        }
+
+        .manual-btn:hover {
+            background-color: #333;
+        }
     </style>
 </head>
 <body>
@@ -80,12 +129,16 @@
       <div class="slides" id="slide-track">
           <img src="https://raw.githubusercontent.com/it2008018/tarablog/main/static/images/ai_1.png" alt="Artwork 1">
           <img src="https://raw.githubusercontent.com/it2008018/tarablog/main/static/images/mw_1.jpeg" alt="Artwork 2">
-          <img src="https://raw.githubusercontent.com/it2008018/tarablog/main/static/images/ai_4.png" alt="Artwork 3">
+          <img src="https://raw.githubusercontent.com/it2008018/tarablog/main/static/images/ai_2.png" alt="Artwork 3">
+          <img src="https://raw.githubusercontent.com/it2008018/tarablog/main/static/images/mw_2.jpg" alt="Artwork 4">
+          <img src="https://raw.githubusercontent.com/it2008018/tarablog/main/static/images/ai_3.png" alt="Artwork 5">
+          <img src="https://raw.githubusercontent.com/it2008018/tarablog/main/static/images/ai_4.jpeg" alt="Artwork 6">
       </div>
       <div class="navigation-manual">
           <div class="manual-btn" onclick="manualSlide(0)"></div>
           <div class="manual-btn" onclick="manualSlide(1)"></div>
           <div class="manual-btn" onclick="manualSlide(2)"></div>
+          <div class="manual-btn" onclick="manualSlide(3)"></div>
       </div>
   </div>
 
@@ -122,7 +175,6 @@
       slides.style.transform = 'translateX(' + (-n * 100) + '%)';
   }
 </script>
-
 <footer>
   <p>© 2025 Tara Bhushan. All rights reserved.</p>
 </footer>
