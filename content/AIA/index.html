@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Personal experience and technical deep dive into generative AI and its role in modern art creation.">
+    <meta name="keywords" content="Generative AI, Diffusion Models, DALL-E, CLIP, Prompt Engineering, AI Art">
+    <meta name="author" content="Your Name">
+    <title>How Generative AI Reignited My Love for Art</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(to right, #ece9e6, #ffffff);
+        }
+        .header {
+            background: url('https://raw.githubusercontent.com/it2008018/tarablog/main/static/images/House_landscape.png') no-repeat center center/cover;
+            height: 300px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            text-shadow: 2px 2px 4px #000;
+        }
+        .header h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: 2.5em;
+            margin: 0;
+        }
+        .container {
+            background: #fff;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            max-width: 900px;
+            margin: -80px auto 40px;
+            position: relative;
+        }
+        h2, h3 {
+            color: #2c3e50;
+        }
+        h2 {
+            margin-top: 40px;
+            font-size: 1.8em;
+        }
+        h3 {
+            margin-top: 30px;
+            font-size: 1.4em;
+        }
+        p {
+            margin-bottom: 1em;
+            color: #555;
+        }
+        ul {
+            margin-left: 20px;
+            color: #555;
+        }
+    </style>
+</head>
+<body>
+<div class="header">
+    <h1>🎨✨ How Generative AI Reignited My Love for Art ✨🎨</h1>
+</div>
+<div class="container">
+    <p>Being a person who is equally invested in technology and art, I feel that generative AI is one of the best things I have discovered in recent days.
+    I used to draw at least once a month a few years back. Sketching, coloring, and designing on Procreate and traditional paints used to be my personal getaway. But over time, work commitments and changing personal priorities shifted my focus, and I didn’t get as much time for art as I wished.</p>
+
+    <p>Now, whenever I manage to secure a few good free days, I still pick up my iPad or brushes and dive into the creative world. But something new has entered my creative toolkit: AI-generated art.</p>
+
+    <p>Over the past few months, I spent time exploring the world of <strong>prompt engineering</strong>—crafting detailed prompts to guide AI models in generating art. It's almost like directing an artist who listens carefully to your vision and brings it to life. I love how these creations turn out. Directing AI with your personal style and seeing your imagination come to life is a truly wonderful feeling.</p>
+
+    <p>Of course, I still believe that <strong>art is, and always will be, deeply human</strong>—an expression of emotions, culture, and individuality.
+    AI should not replace the human soul behind art. Instead, it should be a tool—a brush guided by the human mind. So, instead of copying others' prompts or styles, I encourage everyone to develop their own style and use AI as a partner to express it. Think of yourself as a director: sharing your imagination, steering the creative vision, and bringing dreams into reality through new tools. That’s how AI can truly be part of the artistic journey.</p>
+
+    <h2>🎨 Here's few of my work using AI 🎨</h2>
+    <div class="slideshow">
+      <div class="slides" id="slide-track">
+          <img src="https://raw.githubusercontent.com/it2008018/tarablog/main/static/images/ai_1.png" alt="Artwork 1">
+          <img src="https://raw.githubusercontent.com/it2008018/tarablog/main/static/images/mw_1.jpeg" alt="Artwork 2">
+          <img src="https://raw.githubusercontent.com/it2008018/tarablog/main/static/images/ai_4.png" alt="Artwork 3">
+      </div>
+      <div class="navigation-manual">
+          <div class="manual-btn" onclick="manualSlide(0)"></div>
+          <div class="manual-btn" onclick="manualSlide(1)"></div>
+          <div class="manual-btn" onclick="manualSlide(2)"></div>
+      </div>
+  </div>
+
+    <h2>🛠️ The Tech Behind AI Image Generation 🛠️</h2>
+
+    <p>While enjoying this new wave of creativity, the techie in me couldn't help but dive deeper into <strong>how</strong> this all works.
+    Here’s the gist of what I learned:</p>
+
+    <h3>1. The Magic of Diffusion Models</h3>
+    <p>At the heart of modern image generation (used in models like <strong>DALL·E</strong>, <strong>Stable Diffusion</strong>, <strong>Midjourney</strong>, and others) lies something called a <strong>diffusion model</strong>.</p>
+    <p>Imagine starting with a canvas filled with pure random noise—like TV static. Then, step by step, the AI removes the noise, adding meaningful structure and detail, until a full image emerges that matches your prompt.</p>
+    <p>During training, the model learns the opposite process first: how to <strong>gradually add noise</strong> to real images until they become pure noise. Once trained, it can <strong>reverse</strong> this process creatively based on any input text.</p>
+
+    <h3>2. Guided by Language Understanding – CLIP</h3>
+    <p>But how does the AI know <em>what</em> to draw based on your words?
+    Here enters <strong>CLIP</strong> (Contrastive Language–Image Pre-training), another model by OpenAI.</p>
+    <p>CLIP is trained to understand the relationship between images and text. It learns that a caption like "A cat in a spacesuit on Mars" corresponds to certain types of images. When generating art, CLIP helps score and guide the AI to make sure the image stays faithful to your prompt.</p>
+
+    <h3>3. Prompt Engineering – Your Director’s Script</h3>
+    <p>The better you describe your vision (style, mood, lighting, details, composition), the better the AI understands what to create. This is called <strong>prompt engineering</strong>—the art of crafting precise, imaginative, and detailed prompts. It's like writing a mini screenplay for the AI artist.</p>
+
+    <h2>🌟 Closing Thoughts 🌟</h2>
+    <p>Generative AI, when approached thoughtfully, becomes an extension of human creativity, not a replacement for it.
+    Whether you are an artist at heart, a technologist, or both, learning how these systems work gives you even more power to shape your ideas.</p>
+
+    <p>Keep creating. Keep directing. And remember—the soul of art always belongs to the dreamer behind it.</p>
+</div>
+
+<script>
+  const slides = document.getElementById('slide-track');
+  let index = 0;
+  function manualSlide(n) {
+      index = n;
+      slides.style.transform = 'translateX(' + (-n * 100) + '%)';
+  }
+</script>
+
+<footer>
+  <p>© 2025 Tara Bhushan. All rights reserved.</p>
+</footer>
+</body>
+</html>
