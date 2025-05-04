@@ -83,7 +83,7 @@
   <div class="section">
     <h2>Chapter 1: When Everything Looked Fine—Until It Wasn’t</h2>
     <p>At first, everything worked well. Our pods responded under typical test conditions, and our dashboards stayed green. But during a quarterly deadline rush (yep, our product deals with lots of load on certain quarter of year), traffic suddenly spiked by 4x. That’s when things started to break.</p>
-    <p>Pods started throttling. Response times jumped from 300ms to over 2s. Errors crept into logs—timeouts, database retries, cascading failures. Ironically, the autoscaler <em>did</em> kick in, but it didn’t help. We were scaling garbage.</p>
+    <p>Pods started throttling, Over-provisioning, random OOM kills, and confusing dashboards. One service was scaling to 20 pods while doing nothing. Another one crashed during traffic bursts. Response times jumped from 300ms to over 2s. Errors crept into logs—timeouts, database retries, cascading failures. Ironically, the autoscaler <em>did</em> kick in, but it didn’t help. We were scaling garbage.</p>
     <blockquote>
       “We never really planned for scalability. We just assumed Kubernetes would handle it.”
     </blockquote>
@@ -103,14 +103,81 @@
 
   <div class="section">
     <h2>Chapter 3: Start Small, Then Observe</h2>
-    <p>We began setting intentionally low CPU and memory requests/limits in dev environments to <strong>observe, not assume</strong> usage.</p>
-    <p>As we promoted to UAT and load environments, we monitored usage patterns with <strong>Datadog</strong>. We discovered:</p>
+    <p>
+      We began setting intentionally low CPU and memory requests/limits in dev environments to <strong>observe, not assume</strong> usage.
+    </p>
+    <p>
+      As we promoted to UAT and load environments, we monitored usage patterns with <strong>Datadog</strong>. Here's what worked for us:
+    </p>
     <ul>
-      <li>Some services peaked in memory only briefly under load.</li>
-      <li>Others were CPU-intensive during cold starts.</li>
+      <li>
+        <strong>Enable the Datadog Cluster Agent and kube-state-metrics</strong> to gather HPA metrics and container-level resource stats.
+      </li>
+      <li>
+        In Datadog, use the <strong>Live Containers</strong> and <strong>Containers Overview</strong> dashboards to track:
+        <ul>
+          <li><code>container.cpu.usage</code> vs <code>container.cpu.limit</code></li>
+          <li><code>container.memory.usage</code> vs <code>container.memory.limit</code></li>
+          <li><code>kubernetes.cpu.usage.total</code> and <code>kubernetes.memory.usage</code> at pod and node level</li>
+        </ul>
+      </li>
+      <li>
+        Apply filters by namespace or deployment to identify under- or over-provisioned pods.
+      </li>
+      <li>
+        Use <strong>horizontal pod autoscaling dashboards</strong> to correlate metrics like CPU throttling (<code>container.cpu.throttled</code>) with sudden pod restarts.
+      </li>
     </ul>
-    <p>Datadog dashboards helped us tune our limits over time based on real patterns—not guesses. Our Helm values slowly evolved to reflect lean yet resilient configurations.</p>
-  </div>
+
+    <p>
+      We discovered:
+    </p>
+    <ul>
+      <li>
+        Some services peaked in memory briefly during load spikes — their memory requests were too low, leading to OOM kills.
+      </li>
+      <li>
+        Others were CPU-starved during cold starts due to low request values and slow initialization.
+      </li>
+    </ul>
+
+    <h3>Updating HPA Based on Observations</h3>
+    <p>After analysis:</p>
+    <ol>
+      <li>
+        We updated HPA configs using a <code>targetAverageUtilization</code> of 60–70% to leave headroom:
+        <pre><code>apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+name: my-api-hpa
+spec:
+scaleTargetRef:
+  apiVersion: apps/v1
+  kind: Deployment
+  name: my-api
+minReplicas: 2
+maxReplicas: 10
+metrics:
+- type: Resource
+  resource:
+    name: cpu
+    target:
+      type: Utilization
+      averageUtilization: 65
+- type: Resource
+  resource:
+    name: memory
+    target:
+      type: Utilization
+      averageUtilization: 70</code></pre>
+      </li>
+      <li>
+        We verified with Datadog that pod autoscaling was driven by actual load — not burst noise — by checking sustained utilization trends over 5–10 minute rolling windows.
+      </li>
+    </ol>
+    <p>
+      This approach helped us tune our Helm values and autoscaling rules based on <strong>real-world behavior</strong>, not theory.
+    </p>
 
   <div class="section">
     <h2>Chapter 4: Simulate Reality, Not Ideals</h2>
