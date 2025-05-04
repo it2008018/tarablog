@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Scalability by Design on AKS</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #0e1621;
+      color: #e0e6ed;
+      line-height: 1.6;
+      padding: 2rem;
+    }
+
+    h1, h2, h3 {
+      color: #61dafb;
+    }
+
+    a {
+      color: #90cdf4;
+    }
+
+    code {
+      background-color: #1c2938;
+      padding: 0.2rem 0.4rem;
+      border-radius: 4px;
+      color: #ffffff;
+    }
+
+    pre {
+      background-color: #1c2938;
+      padding: 1rem;
+      border-radius: 6px;
+      overflow-x: auto;
+    }
+
+    blockquote {
+      border-left: 4px solid #61dafb;
+      padding-left: 1rem;
+      color: #d1d9e6;
+      font-style: italic;
+    }
+
+    .section {
+      margin-bottom: 3rem;
+    }
+
+    footer {
+      text-align: center;
+      margin-top: 4rem;
+      padding-top: 2rem;
+      border-top: 1px solid #1c2938;
+      color: #a0aec0;
+      font-size: 0.9rem;
+    }
+
+    header {
+      background-image: url('https://raw.githubusercontent.com/it2008018/tarablog/main/static/images/aks_header.jpeg');
+      background-size: cover;
+      background-position: center;
+      border-radius: 10px;
+      height: 300px;
+      margin-bottom: 2rem;
+    }
+  </style>
+</head>
+<body>
+  <header></header>
+
+  <h1>Scalability by Design: How We Learned to Plan Performance & Load Testing for Applications on AKS</h1>
+
+  <p>Let me tell you a story.</p>
+
+  <p>A few months ago, our team proudly deployed one of our most critical microservices onto Azure Kubernetes Service (AKS). It was modern, containerized, and fully integrated with Azure DevOps. We had CI/CD running like clockwork, YAML pipelines humming, and a cloud-native architecture that looked great in diagrams.</p>
+
+  <p>But then came the <em>"real"</em> traffic.</p>
+
+  <div class="section">
+    <h2>Chapter 1: When Everything Looked Fine—Until It Wasn’t</h2>
+    <p>At first, everything worked well. Our pods responded under typical test conditions, and our dashboards stayed green. But during a quarterly tax deadline rush (yep, our product deals with tax filings), traffic suddenly spiked by 4x. That’s when things started to break.</p>
+    <p>Pods started throttling. Response times jumped from 300ms to over 2s. Errors crept into logs—timeouts, database retries, cascading failures. Ironically, the autoscaler <em>did</em> kick in, but it didn’t help. We were scaling garbage.</p>
+    <blockquote>
+      “We never really planned for scalability. We just assumed Kubernetes would handle it.”
+    </blockquote>
+  </div>
+
+  <div class="section">
+    <h2>Chapter 2: The First Hard Lesson — Know What You’re Scaling</h2>
+    <p>We went back to basics. Not Helm charts or YAML, but questions:</p>
+    <ul>
+      <li>What are our most performance-sensitive APIs?</li>
+      <li>How do users actually interact with the system?</li>
+      <li>Are our workloads CPU-bound or I/O-bound?</li>
+      <li>How does load flow across services?</li>
+    </ul>
+    <p>We realized a single endpoint triggered multiple downstream services and slow database joins. We could have predicted it with proper performance modeling.</p>
+  </div>
+
+  <div class="section">
+    <h2>Chapter 3: Start Small, Then Observe</h2>
+    <p>We began setting intentionally low CPU and memory requests/limits in dev environments to <strong>observe, not assume</strong> usage.</p>
+    <p>As we promoted to UAT and load environments, we monitored usage patterns with <strong>Datadog</strong>. We discovered:</p>
+    <ul>
+      <li>Some services peaked in memory only briefly under load.</li>
+      <li>Others were CPU-intensive during cold starts.</li>
+    </ul>
+    <p>Datadog dashboards helped us tune our limits over time based on real patterns—not guesses. Our Helm values slowly evolved to reflect lean yet resilient configurations.</p>
+  </div>
+
+  <div class="section">
+    <h2>Chapter 4: Simulate Reality, Not Ideals</h2>
+    <p>We used <strong>k6</strong> to model full user journeys, not just endpoints. We simulated:</p>
+    <ul>
+      <li>Login</li>
+      <li>Document upload</li>
+      <li>Validation trigger</li>
+      <li>Processing wait</li>
+      <li>Report download</li>
+    </ul>
+    <p>We tested from 100 to 2000 users. One API consistently failed with concurrent uploads over 150. That test saved us more than any sprint metric.</p>
+  </div>
+
+  <div class="section">
+    <h2>Chapter 5: Enter KEDA and Virtual Nodes</h2>
+    <p>We used <strong>HPA</strong> for scaling API pods based on latency and <strong>KEDA</strong> for event-driven scaling (Azure Service Bus).</p>
+    <p>We also enabled <strong>virtual nodes</strong> to burst compute during spikes. Now we were scaling smart—not wide.</p>
+  </div>
+
+  <div class="section">
+    <h2>Chapter 6: Automation is Cheaper Than Panic</h2>
+    <p>We baked performance tests into our CI/CD:</p>
+    <ul>
+      <li><code>k6</code> tests pre-deploy</li>
+      <li>Fail builds on latency or error thresholds</li>
+    </ul>
+    <p>We added <strong>Azure Load Testing</strong> for staging and relied on <strong>Datadog + Grafana</strong> to monitor production metrics. We finally had a system we could trust to scale under pressure.</p>
+  </div>
+
+  <div class="section">
+    <h2>Epilogue: What I’d Tell Past Me</h2>
+    <blockquote>
+      “Don’t assume Kubernetes will scale for you. It <em>can</em>, but only if you tell it <em>how</em>, <em>when</em>, and <em>why</em>.”
+    </blockquote>
+    <p>Start small with resource limits. Observe and refine as you go up the environments. Use tools like <strong>Datadog</strong> to let real usage guide your configurations. Plan scalability the way you plan for features. Simulate pain before your users feel it.</p>
+    <p>Because when you plan scalability by design, scaling becomes a feature—not a fire.</p>
+  </div>
+
+  <footer>
+    <p>© 2025 Tara Bhushan. All rights reserved.</p>
+  </footer>
+</body>
+</html>
