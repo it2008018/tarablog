@@ -57,16 +57,20 @@
 
     header {
       background-image: url('https://raw.githubusercontent.com/it2008018/tarablog/main/static/images/aks_header.jpeg');
-      background-size: cover;
-      background-position: center;
-      border-radius: 10px;
-      height: 300px;
+      background-size: contain; /* Ensures full image is visible */
+      background-repeat: no-repeat;
+      background-position: right;
+      height: 200px;
+      width: 100%;
       margin-bottom: 2rem;
+      position: relative;
+      border-radius: 10px;
+      background-color: #082d62; /* fallback color */
     }
   </style>
 </head>
 <body>
-  <header></header>
+</header>
 
   <h1>Scalability by Design: How We Learned to Plan Performance & Load Testing for Applications on AKS</h1>
 
