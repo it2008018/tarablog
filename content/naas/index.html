@@ -2,49 +2,87 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>NaaS - No as a Service</title>
   <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+  <link rel="icon" href="https://raw.githubusercontent.com/it2008018/tarablog/main/static/images/ai_2814666.png" />
   <style>
-    body { font-family: 'Comic Sans MS', sans-serif; }
+    body {
+      font-family: 'Comic Sans MS', sans-serif;
+      background-image: url('https://raw.githubusercontent.com/it2008018/tarablog/main/static/images/ai_bg.png');
+      background-size: cover;
+      background-position: center;
+      background-attachment: fixed;
+    }
     footer {
       background-color: rgba(14, 165, 233, 0.3);
       border-left: 6px solid #0ea5e9;
-      padding: 0.1rem 0.1rem;
+      padding: 0.3rem 0.5rem;
       text-align: center;
       margin-top: 10rem;
       margin-bottom: 2rem;
       border-radius: 0.5rem;
     }
+    .emoji-pop {
+      animation: pop 0.5s ease-out forwards;
+    }
+    @keyframes pop {
+      0% { transform: scale(0); opacity: 0; }
+      100% { transform: scale(1); opacity: 1; }
+    }
   </style>
 </head>
-<body class="bg-gray-900 text-white min-h-screen flex flex-col justify-center items-center p-6">
+<body class="bg-black bg-opacity-70 text-white min-h-screen flex flex-col justify-center items-center p-6">
+
+  <audio id="noSound" src="https://actions.google.com/sounds/v1/cartoon/cartoon_boing.ogg" preload="auto"></audio>
+
   <div class="text-center">
-    <h1 class="text-5xl font-bold mb-2">NaaS</h1>
-    <p class="text-xl mb-6">No as a Service – Always here to let you down.</p>
+    <img src="https://img.icons8.com/external-flat-juicy-fish/100/000000/external-ai-artificial-intelligence-flat-flat-juicy-fish.png" alt="AI Icon" class="mx-auto mb-4" />
+    <h1 class="text-6xl font-bold mb-2">NaaS</h1>
+    <p class="text-xl mb-6">No as a Service – Always here to let you down 😎</p>
     <input id="questionInput" type="text" placeholder="Ask anything..." class="p-3 text-black rounded w-80 mb-4" />
     <br />
     <button onclick="getNoResponse()" class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded">Ask NaaS</button>
-    <div id="response" class="mt-8 text-3xl font-bold animate-pulse"></div>
+    <div id="response" class="mt-8 text-3xl font-bold min-h-[4rem]"></div>
+    <div id="emojiExplosion" class="text-4xl mt-4"></div>
   </div>
+
+  <footer>
+    <p>© 2025 Tara Bhushan. All rights reserved.</p>
+  </footer>
 
   <script>
     async function getNoResponse() {
       const question = document.getElementById('questionInput').value;
       const responseDiv = document.getElementById('response');
+      const emojiDiv = document.getElementById('emojiExplosion');
+      const noSound = document.getElementById('noSound');
 
-      responseDiv.innerText = "Thinking...";
+      responseDiv.innerHTML = `<svg class="animate-spin h-10 w-10 text-blue-400 mx-auto" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
+      </svg>`;
 
-      const res = await fetch('https://naas-cwdtfkesd6dzgvgt.eastus-01.azurewebsites.net/api/no', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ question })
-      });
+      emojiDiv.innerHTML = '';
 
-      const data = await res.json();
-      responseDiv.innerText = data.response;
+      try {
+        const res = await fetch('https://naas-cwdtfkesd6dzgvgt.eastus-01.azurewebsites.net/api/no', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ question })
+        });
+
+        const data = await res.json();
+        noSound.play();
+        responseDiv.innerText = data.response;
+
+        // Emoji pop effect
+        const emojis = ['🙅‍♂️', '🚫', '😂', '😈', '❌', '💀', '🙃'];
+        emojiDiv.innerHTML = emojis.map(e => `<span class="emoji-pop">${e}</span>`).join(' ');
+      } catch (err) {
+        responseDiv.innerText = "Error: NaaS said no to itself.";
+      }
     }
   </script>
-  <footer> <p>© 2025 Tara Bhushan. All rights reserved.</p> </footer>
 </body>
 </html>
