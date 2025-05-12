@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NaaS - No as a Service</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+  <style>
+    body { font-family: 'Comic Sans MS', cursive, sans-serif; }
+  </style>
+</head>
+<body class="bg-gray-900 text-white min-h-screen flex flex-col justify-center items-center p-6">
+  <div class="text-center">
+    <h1 class="text-5xl font-bold mb-2">NaaS</h1>
+    <p class="text-xl mb-6">No as a Service – Always here to let you down.</p>
+    <input id="questionInput" type="text" placeholder="Ask anything..." class="p-3 text-black rounded w-80 mb-4" />
+    <br />
+    <button onclick="getNoResponse()" class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded">Ask NaaS</button>
+    <div id="response" class="mt-8 text-3xl font-bold animate-pulse"></div>
+  </div>
+
+  <script>
+    async function getNoResponse() {
+      const question = document.getElementById('questionInput').value;
+      const responseDiv = document.getElementById('response');
+
+      responseDiv.innerText = "Thinking...";
+
+      const res = await fetch('https://naas-cwdtfkesd6dzgvgt.eastus-01.azurewebsites.net/api/no', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ question })
+      });
+
+      const data = await res.json();
+      responseDiv.innerText = data.response;
+    }
+  </script>
+  <footer> <p>© 2025 Tara Bhushan. All rights reserved.</p> </footer>
+</body>
+</html>
