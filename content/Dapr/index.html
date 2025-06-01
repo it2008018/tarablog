@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Secure mTLS in AKS for Windows Headless Services</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 2rem;
+      font-family: 'Fira Code', Consolas, monospace;
+      background-color: #1e1e2f;
+      color: #f5f5f5;
+      line-height: 1.6;
+    }
+    h1, h2, h3 {
+      color: #ffffff;
+      font-weight: bold;
+    }
+    h1 {
+      font-size: 2rem;
+      margin-bottom: 1.2rem;
+    }
+    h2 {
+      font-size: 1.5rem;
+      margin-top: 2rem;
+    }
+    h3 {
+      font-size: 1.2rem;
+      margin-top: 1.5rem;
+    }
+    p {
+      margin-bottom: 1rem;
+    }
+    blockquote {
+      border-left: 4px solid #ffcb6b;
+      padding-left: 1rem;
+      color: #c792ea;
+      font-style: italic;
+      margin: 1.5rem 0;
+    }
+    pre {
+      background-color: #282c34;
+      color: #abb2bf;
+      padding: 1rem;
+      border-radius: 6px;
+      overflow-x: auto;
+      margin: 1rem 0;
+    }
+    code {
+      background-color: #2c313c;
+      color: #dcdfe4;
+      padding: 2px 4px;
+      border-radius: 4px;
+      font-family: 'Fira Code', monospace;
+    }
+    ul {
+      margin-left: 1.5rem;
+    }
+    .note {
+      background-color: #2b3a42;
+      border-left: 4px solid #4ecdc4;
+      padding: 1rem;
+      margin: 2rem 0;
+      color: #d0f0f0;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 2rem 0;
+      color: #e0e0e0;
+    }
+    th, td {
+      padding: 0.75rem;
+      border: 1px solid #3a3a3a;
+    }
+    th {
+      background-color: #2d2d2d;
+      color: #ffffff;
+    }
+    td {
+      background-color: #262626;
+    }
+    a {
+      color: #82aaff;
+      text-decoration: none;
+    }
+    a:hover {
+      text-decoration: underline;
+    }
+        footer {
+      text-align: center;
+      margin-top: 4rem;
+      padding-top: 2rem;
+      border-top: 1px solid #1c2938;
+      color: #a0aec0;
+      font-size: 0.9rem;
+    }
+
+        .header {
+            background: url('https://raw.githubusercontent.com/it2008018/tarablog/main/static/images/Dapr.png') no-repeat center center/cover;
+            height: 100px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            text-shadow: 2px 2px 4px #000;
+            padding-bottom: 2%;
+            border-bottom: 3px dashed #a45a52;
+        }
+        .header h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: 2.5em;
+            margin: 0;
+        }
+  </style>
+</head>
+<body>
+<div class="header">
+<h1>When Windows Pods Talk Securely</h1>
+</div>
+<p><em>“Everything was working great — until it wasn’t.”</em></p>
+
+<p>That’s how most DevOps stories begin, and this one’s no different.</p>
+
+<p>We had just wrapped up a seemingly successful AKS deployment. Two services, both running as Windows containers. They weren’t exposed externally. Instead, they communicated through Kubernetes <strong>headless services</strong>. Fast, efficient, and internal-only — exactly how we liked it.</p>
+
+<p>But then came <strong>security reviews</strong>. The dreaded words were uttered:</p>
+<blockquote>"We need mTLS between these services."</blockquote>
+
+<h2>🕳️ Down the Mesh Hole</h2>
+
+<p>First, we tried <strong>Istio Ambient Mesh</strong>. It’s the buzzword these days. No sidecars, just transparent magic. But no love for Windows containers — not yet.</p>
+
+<p>Next up, <strong>Linkerd</strong>. Elegant, simple. Also: <strong>Linux-only.</strong></p>
+
+<p>Then came <strong>Dapr</strong>. The promise was sweet: built-in mTLS, and Windows support! But here’s the kicker — it <strong>doesn’t work with headless services</strong>.</p>
+
+<h2>🔐 How Dapr Handles mTLS</h2>
+
+<p>Dapr enables mTLS using sidecar-to-sidecar authentication and encryption. Here’s what happens when Service A calls Service B:</p>
+
+<ol>
+  <li>Service A calls Dapr’s local API: <code>http://localhost:3500/v1.0/invoke/service-b/method/foo</code></li>
+  <li>Dapr sidecar for Service A resolves <code>service-b</code> and opens a mutual TLS connection with its sidecar</li>
+  <li>Certificates are rotated automatically and identities are verified using SPIFFE IDs</li>
+</ol>
+
+<p>Result: full mTLS with zero app-layer effort — but only if you use Dapr’s API.</p>
+
+<h2>🚫 Why Dapr Doesn’t Work with Headless Services</h2>
+
+<p>Headless services resolve directly to pod IPs. When you use:</p>
+
+<pre><code>https://my-service-0.my-service-headless.default.svc.cluster.local:5001</code></pre>
+
+<p>You're talking directly to the app, skipping the Dapr sidecar entirely. That breaks:</p>
+
+<ul>
+  <li>Request interception</li>
+  <li>Retries and observability</li>
+  <li><strong>mTLS enforcement</strong></li>
+</ul>
+
+<p><strong>Dapr cannot inject itself into direct pod-to-pod TCP/IP connections.</strong></p>
+
+<h2>✏️ Code Changes Required for Dapr mTLS</h2>
+
+<h3>1. Add Sidecar Annotations</h3>
+
+<pre><code>annotations:
+  dapr.io/enabled: "true"
+  dapr.io/app-id: "my-app"
+  dapr.io/app-port: "5000"
+</code></pre>
+
+<h3>2. Replace HTTP Client Calls</h3>
+
+<p>Instead of calling other services over DNS/IP, use:</p>
+
+<pre><code>POST http://localhost:3500/v1.0/invoke/my-other-app/method/do-work</code></pre>
+
+<h3>3. Use Dapr SDK (Optional but clean)</h3>
+
+<pre><code>var client = new DaprClientBuilder().Build();
+var result = await client.InvokeMethodAsync&lt;Input, Output&gt;("my-other-app", "do-work", input);
+</code></pre>
+
+<h2>✅ What Worked For Us</h2>
+
+<p>We chose a full app-layer TLS approach in .NET — using certificates and enforcing validation at runtime.</p>
+
+<h3>Client-side in .NET</h3>
+<pre><code>var handler = new HttpClientHandler();
+handler.ClientCertificates.Add(new X509Certificate2("client.pfx", "password"));
+var client = new HttpClient(handler);</code></pre>
+
+<h3>Server-side with Kestrel</h3>
+<pre><code>webBuilder.ConfigureKestrel(serverOptions =&gt;
+{
+    serverOptions.ConfigureHttpsDefaults(httpsOptions =&gt;
+    {
+        httpsOptions.ServerCertificate = new X509Certificate2("server.pfx", "password");
+        httpsOptions.ClientCertificateMode = ClientCertificateMode.RequireCertificate;
+        httpsOptions.ClientCertificateValidation = (cert, chain, errors) =&gt;
+        {
+            return cert.Issuer == "CN=MyInternalCA";
+        };
+    });
+});</code></pre>
+
+<h2>🎯 Final Thoughts</h2>
+
+<p>If you're using Windows containers and headless services, service mesh solutions may not save you. Dapr works — but only if you go through its APIs.</p>
+
+<p>Sometimes, engineering means getting your hands dirty with certs, handlers, and validation callbacks. That’s what makes it fun.</p>
+
+<blockquote>We didn’t win with tools — we won with code.</blockquote>
+  <footer>
+    <p>© 2025 Tara Bhushan. All rights reserved.</p>
+  </footer>
+</body>
+</html>
