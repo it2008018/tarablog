@@ -123,7 +123,7 @@
 
 <p>That’s how most DevOps stories begin, and this one’s no different.</p>
 
-<p>We had just wrapped up a seemingly successful AKS deployment. Two services, both running as Windows containers. They weren’t exposed externally. Instead, they communicated through Kubernetes <strong>headless services</strong>. Fast, efficient, and internal-only — exactly how we liked it.</p>
+<p>We had many services with successful AKS deployment, running over Linux and Windows containers based on the requirements. Many of the services aren’t exposed externally. Instead, they communicated through Kubernetes <strong>headless services</strong>. Fast, efficient, and internal-only — exactly how we liked it.</p>
 
 <p>But then came <strong>security reviews</strong>. The dreaded words were uttered:</p>
 <blockquote>"We need mTLS between these services."</blockquote>
@@ -186,9 +186,9 @@
 var result = await client.InvokeMethodAsync&lt;Input, Output&gt;("my-other-app", "do-work", input);
 </code></pre>
 
-<h2>✅ What Worked For Us</h2>
+<h2>✅ Alternate approach</h2>
 
-<p>We chose a full app-layer TLS approach in .NET — using certificates and enforcing validation at runtime.</p>
+<p>Chose a full app-layer TLS approach in .NET — using certificates and enforcing validation at runtime.</p>
 
 <h3>Client-side in .NET</h3>
 <pre><code>var handler = new HttpClientHandler();
@@ -215,7 +215,7 @@ var client = new HttpClient(handler);</code></pre>
 
 <p>Sometimes, engineering means getting your hands dirty with certs, handlers, and validation callbacks. That’s what makes it fun.</p>
 
-<blockquote>We didn’t win with tools — we won with code.</blockquote>
+<blockquote>If you dont win with tools — You win with code.</blockquote>
   <footer>
     <p>© 2025 Tara Bhushan. All rights reserved.</p>
   </footer>
