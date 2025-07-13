@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title></title>
+</head>
+<body>
+  <header>
+    <h1></h1>
+  </header>
+  <main>
+    <article>
+      <div class="content">
+        <!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Ingress vs. Gateway API</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      line-height: 1.6;
+      margin: 0;
+      background-image: url('https://raw.githubusercontent.com/it2008018/tarablog/main/static/images/aerial-view-container-cargo-ship-sea.jpg');
+      background-size: cover;
+      background-attachment: fixed;
+      background-repeat: no-repeat;
+      background-position: center;
+      color: #333;
+      opacity: 0.8;
+    }
+    .container {
+      background-color: rgba(255, 255, 255, 0.95);
+      margin: 0 auto;
+      padding: 2rem;
+      max-width: 960px;
+    }
+    header, footer {
+      background-color: #3537af;
+      color: white;
+      text-align: center;
+      padding: 1rem;
+      opacity: 0.7;
+    }
+    h1, h2, h3 {
+      color: black
+    }
+    code {
+      background-color: #eee;
+      padding: 0.2rem 0.4rem;
+      border-radius: 4px;
+    }
+    pre {
+      background-color: #eee;
+      padding: 1rem;
+      border-radius: 6px;
+      overflow-x: auto;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 2rem 0;
+    }
+    table, th, td {
+      border: 1px solid #ccc;
+    }
+    th, td {
+      padding: 0.8rem;
+      text-align: left;
+    }
+    th {
+      background-color: #f0f0f0;
+    }
+  </style>
+</head>
+<body>
+  <header>
+  <h1 style="margin: 0; font-size: 2rem; padding: 0.5rem 0;">Ingress vs. Gateway API</h1>
+  <p style="margin: 0; font-size: 1rem; font-weight: 300;">Your guide for "when to Switch to Gateway API?"</p>
+</header>
+
+  <div class="container">
+    <p>If you work on Kubernetes platform you must have used Ingress as the go-to resource for exposing HTTP(S) services outside the cluster. It's been simple, widely supported, and mostly… good enough. But as cloud-native applications evolve, microservices multiply, and traffic management becomes more complex, developers and platform teams are hitting the limits of what Ingress can offer.</p>
+
+    <p>Enter the <strong>Gateway API</strong> — a modern, extensible, and more expressive successor to Ingress. If you're wondering whether Ingress is becoming “old school,” you’re not wrong. The real question is: <strong>When should you switch?</strong> Let’s explore.</p>
+
+    <h2>🚪 The Limits of Ingress</h2>
+    <ul>
+      <li><strong>Limited expressiveness</strong>: Only supports HTTP(S) out of the box, and configuring things like TCP, gRPC, or TLS passthrough is vendor-specific.</li>
+      <li><strong>Annotation overload</strong>: Every implementation (NGINX, Traefik, Istio, etc.) uses its own annotations, making portability and consistency a nightmare.</li>
+      <li><strong>Single point of configuration</strong>: You often end up cramming everything — routing, security, timeouts, retries — into a single Ingress object.</li>
+      <li><strong>Lack of RBAC separation</strong>: There's no clean separation between infrastructure and app teams when managing Ingress resources.</li>
+    </ul>
+
+    <h2>🎉 Meet Gateway API: Ingress Reimagined</h2>
+    <p>The <strong>Gateway API</strong> is a Kubernetes-native standard designed to replace and improve upon Ingress. It's not just a new object — it's a new model for traffic routing in Kubernetes that emphasizes <strong>modularity</strong>, <strong>extensibility</strong>, and <strong>role separation</strong>.</p>
+
+    <h3>Key Features</h3>
+    <ul>
+      <li><strong>Decoupled resources</strong>: Define infrastructure-level config (<code>GatewayClass</code>, <code>Gateway</code>) separately from routing config (<code>HTTPRoute</code>, <code>TCPRoute</code>, etc.).</li>
+      <li><strong>Rich traffic control</strong>: Native support for path-based routing, header-based matching, weighted traffic splitting, and more.</li>
+      <li><strong>Multi-protocol support</strong>: Built-in support for HTTP, HTTPS, TCP, TLS, and gRPC.</li>
+      <li><strong>Clear role boundaries</strong>: Cluster operators manage Gateways, developers define Routes.</li>
+      <li><strong>Standardized cross-provider behavior</strong>: Reduced reliance on vendor-specific annotations.</li>
+    </ul>
+
+    <h2>🔄 When to Switch</h2>
+    <p>Not everyone needs to abandon Ingress <em>right now</em>, but there are clear use cases where Gateway API is the better choice:</p>
+
+    <h3>✅ You Should Switch If:</h3>
+    <ul>
+      <li><strong>You’re building a platform for multiple teams</strong> – Clean RBAC boundaries between infra and app teams.</li>
+      <li><strong>You need advanced routing</strong> – Weighted traffic splitting, header- or method-based routing, native gRPC/TCP.</li>
+      <li><strong>You’re using a service mesh</strong> – Most meshes are adopting Gateway API as the standard ingress mechanism.</li>
+      <li><strong>You want portability across providers</strong> – Gateway API is becoming a Kubernetes standard supported by many vendors.</li>
+      <li><strong>You're modernizing your infrastructure</strong> – Adopting GitOps, multi-tenancy, and platform engineering practices.</li>
+    </ul>
+
+    <h2>🚠 Ingress vs. Gateway API: Quick Comparison</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Feature</th>
+          <th>Ingress</th>
+          <th>Gateway API</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Resource Model</td>
+          <td>Monolithic</td>
+          <td>Modular (Gateway, Route)</td>
+        </tr>
+        <tr>
+          <td>Protocol Support</td>
+          <td>HTTP/HTTPS only</td>
+          <td>HTTP, HTTPS, TCP, gRPC, TLS</td>
+        </tr>
+        <tr>
+          <td>Advanced Routing</td>
+          <td>Limited (via annotations)</td>
+          <td>Native, expressive</td>
+        </tr>
+        <tr>
+          <td>Role Separation</td>
+          <td>No</td>
+          <td>Yes</td>
+        </tr>
+        <tr>
+          <td>Portability</td>
+          <td>Low (vendor-specific)</td>
+          <td>High (standardized)</td>
+        </tr>
+        <tr>
+          <td>Observability/Status</td>
+          <td>Limited</td>
+          <td>Rich status reporting</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h2>🧪 How to Get Started</h2>
+    <p>Want to test Gateway API? Here's a simple example:</p>
+    <pre><code>apiVersion: gateway.networking.k8s.io/v1
+kind: Gateway
+metadata:
+  name: my-gateway
+spec:
+  gatewayClassName: istio
+  listeners:
+  - name: http
+    protocol: HTTP
+    port: 80
+    allowedRoutes:
+      namespaces:
+        from: Same</code></pre>
+
+    <pre><code>apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: my-route
+spec:
+  parentRefs:
+  - name: my-gateway
+  rules:
+  - matches:
+    - path:
+        type: PathPrefix
+        value: /app
+    backendRefs:
+    - name: my-service
+      port: 80</code></pre>
+
+    <h2>🚦 Is Ingress Going Away?</h2>
+    <p>Not immediately. Ingress is still widely supported and maintained. But its evolution is effectively frozen. Gateway API is the <strong>future of Kubernetes networking</strong>, and the ecosystem is moving there fast.</p>
+
+    <h2>🏆 Final Thoughts</h2>
+    <p>Ingress served us well. But Kubernetes has grown up, and your networking layer should too. Gateway API offers a modern, expressive, and scalable way to handle service exposure in today’s complex cloud-native environments.</p>
+ <p><strong>Is Ingress going away? Maybe. Is this right time to switch? Definitely.</strong></p>
+  </div>
+
+  <footer>
+    <p>© 2025 Tara Bhushan. All rights reserved.</p>
+  </footer>
+</body>
+</html>
+
+      </div>
+    </article>
+  </main>
+</body>
+</html>
