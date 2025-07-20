@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Azure Blueprints and Azure Landing Zones – My Journey to Cloud Governance</title>
+  <style>
+      body {
+      font-family: Arial, sans-serif;
+      line-height: 1.6;
+      margin: 0;
+      background-image: url('https://raw.githubusercontent.com/it2008018/tarablog/main/static/images/landing_zone_bg.jpg');
+      background-size: cover;
+      background-attachment: fixed;
+      background-repeat: no-repeat;
+      background-position: center;
+      color: #333;
+      opacity: 0.8;
+    }
+    .container {
+      background-color: rgba(255, 255, 255, 0.95);
+      margin: 0 auto;
+      padding: 2rem;
+      max-width: 960px;
+    }
+    header, footer {
+      background-color: #3537af;
+      color: white;
+      text-align: center;
+      padding: 1rem;
+      opacity: 0.7;
+    }
+    h1, h2, h3 {
+      color: black
+    }
+
+    header h1, footer p {
+      margin: 0;
+    }
+
+    a {
+      color: #0f62fe;
+      text-decoration: none;
+    }
+
+    a:hover {
+      text-decoration: underline;
+    }
+
+    code {
+      background: #eee;
+      padding: 2px 4px;
+      border-radius: 4px;
+    }
+        table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 20px 0;
+    }
+    th, td {
+      border: 1px solid #aaa;
+      padding: 10px;
+      text-align: left;
+    }
+    th {
+      background-color: #f4f4f4;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>My Journey into Azure Governance</h1>
+  </header>
+
+  <div class="container">
+    <h2>From Chaos to Compliance with Azure Blueprints and Landing Zones</h2>
+
+    <p>
+      When we first stepped into cloud governance, we were managing dozens of Azure subscriptions
+      across various departments. Everyone was deploying at full speed—but with that velocity came
+      inconsistencies, security loopholes, and compliance headaches.
+    </p>
+
+    <h2>The Governance Problem</h2>
+
+    <p>
+      Teams chose their own regions, ignored tagging policies, and assigned roles ad hoc.
+      Security and audit findings kept piling up. I knew we needed a standardized way to deploy and manage environments—
+      a way to enforce compliance <strong>without slowing down innovation</strong>.
+    </p>
+
+    <p>That’s when we discovered <strong>Azure Blueprints</strong>—and later, <strong>Azure Landing Zones</strong>.</p>
+
+  <h2>Phase 1 – Establishing Order with Azure Blueprints</h2>
+
+  <p>Our first focus was on <strong>establishing governance</strong> without becoming a bottleneck to the teams.</p>
+
+  <p>Azure Blueprints allowed us to:</p>
+  <ul>
+    <li>Bundle <strong>resource group structures</strong>, <strong>policy assignments</strong>, <strong>role assignments</strong>, and <strong>ARM templates</strong> into a versioned governance artifact.</li>
+    <li>Assign it to any new or existing subscription.</li>
+    <li>Ensure every subscription was created with a <strong>minimum baseline of compliance</strong>.</li>
+  </ul>
+
+  <p>We created a blueprint called <code>secure-landing-zone</code> which enforced:</p>
+  <ul>
+    <li>Resource tagging</li>
+    <li>HTTPS-only on storage accounts</li>
+    <li>Disabled public IPs on VMs</li>
+    <li>Enabled diagnostic logging</li>
+    <li>Predefined networking and monitoring resource groups</li>
+    <li>Environment-based role assignments</li>
+  </ul>
+
+  <p>It worked beautifully — for a while.</p>
+
+  <h2>Phase 2 – Growing Pains and the Limitations of Blueprints</h2>
+
+  <p>Over time, we started hitting limits:</p>
+  <ul>
+    <li><strong>Versioning and rollback</strong> were difficult</li>
+    <li><strong>CI/CD integration</strong> was weak</li>
+    <li>We needed <strong>more modular and flexible governance</strong></li>
+    <li>Blueprints weren’t evolving much on Microsoft’s roadmap</li>
+  </ul>
+
+  <p>We discovered <a href="https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/landing-zone/" target="_blank"><strong>Azure Landing Zones</strong></a> — a modern governance model from the Cloud Adoption Framework (CAF) that offered more than compliance:</p>
+
+  <ul>
+    <li>Network and identity architectures</li>
+    <li>Security and compliance baselines</li>
+    <li>Management group hierarchies</li>
+    <li>Connectivity and hybrid readiness</li>
+  </ul>
+
+  <blockquote>
+    Blueprints helped us enforce known rules. Landing Zones helped us design the future.
+  </blockquote>
+
+  <h2>Phase 3 – Transitioning to Azure Landing Zones</h2>
+
+  <p>Eventually, we adopted Microsoft’s Enterprise-Scale Landing Zone accelerator using:</p>
+  <ul>
+    <li><strong>Bicep templates</strong></li>
+    <li><strong>Azure Policy initiatives</strong></li>
+    <li><strong>Management group hierarchy</strong></li>
+  </ul>
+
+  <p>We built a subscription provisioning pipeline that:</p>
+  <ul>
+    <li>Linked new subscriptions to the correct management group</li>
+    <li>Deployed our full governance baseline</li>
+    <li>Set budgets, policies, roles, and diagnostic settings</li>
+  </ul>
+
+  <p>It was automated, consistent, and scalable. Blueprints became optional. Landing Zones became the standard.</p>
+
+  <h2>Blueprints vs. Landing Zones: My Takeaways</h2>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Feature</th>
+        <th>Azure Blueprints</th>
+        <th>Azure Landing Zones</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Purpose</td>
+        <td>Governance bundling</td>
+        <td>Enterprise-scale architecture</td>
+      </tr>
+      <tr>
+        <td>Flexibility</td>
+        <td>Medium</td>
+        <td>High</td>
+      </tr>
+      <tr>
+        <td>CI/CD Integration</td>
+        <td>Limited</td>
+        <td>Excellent</td>
+      </tr>
+      <tr>
+        <td>Governance Scope</td>
+        <td>Subscription-level</td>
+        <td>Management-group-driven</td>
+      </tr>
+      <tr>
+        <td>Microsoft Roadmap</td>
+        <td>Slowing</td>
+        <td>Actively evolving</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h2>Lessons I Learned</h2>
+  <ul>
+    <li><strong>Start with Blueprints</strong> when you need to enforce structure fast.</li>
+    <li>Use <strong>Landing Zones</strong> when you need to scale with flexibility.</li>
+    <li><strong>Governance ≠ Restriction</strong>. It’s about enabling secure delivery.</li>
+    <li><strong>Automate everything</strong> — governance must live in pipelines.</li>
+    <li>Blueprints are helpful. Landing Zones are foundational.</li>
+  </ul>
+
+  <h2>Final Thoughts</h2>
+
+  <p>Looking back, Azure Blueprints gave me a much-needed head start on governance when everything felt out of control. But Landing Zones offered a more scalable, strategic foundation that grew with our cloud footprint.</p>
+
+  <p>If you're in the early stages of cloud adoption, Blueprints will help you get started. But if you’re serious about scale, security, and sustainability — <strong>Landing Zones are the way forward</strong>.</p>
+
+  <blockquote>
+    Ask yourself: “Do I need structure, or do I need strategy?”<br>
+    If it’s structure, start with Blueprints.<br>
+    If it’s strategy, embrace Landing Zones.
+  </blockquote>
+
+    <h2>Helpful Resources</h2>
+    <ul>
+      <li>
+        <a href="https://learn.microsoft.com/en-us/azure/governance/blueprints/">
+          Azure Blueprints Documentation
+        </a>
+      </li>
+      <li>
+        <a href="https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/landing-zone/">
+          Azure Landing Zones – Cloud Adoption Framework
+        </a>
+      </li>
+    </ul>
+
+    <p>
+      If you're at the early stage of your Azure governance journey, start simple—but start
+      right. These tools can turn chaos into compliance, and stress into strategy.
+    </p>
+  </div>
+
+  <footer>
+    <p>&copy; © 2025 Tara Bhushan. All rights reserved.</p>
+  </footer>
+</body>
+</html>
