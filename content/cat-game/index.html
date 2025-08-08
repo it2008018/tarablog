@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Cat Jump — Pixel Cat & Buckets</title>
+<style>
+  :root{--sky:#cce7ff;--ground:#654321}
+  html,body{height:100%;margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial}
+  body{background:var(--sky);display:flex;align-items:center;justify-content:center}
+  #gameCanvas{background:transparent;display:block;border:1px solid rgba(0,0,0,0.06)}
+  .hud{position:absolute;left:12px;top:12px;background:rgba(255,255,255,0.95);padding:8px 10px;border-radius:8px;box-shadow:0 6px 18px rgba(0,0,0,0.08)}
+  .controls{position:absolute;right:12px;top:12px;background:rgba(255,255,255,0.95);padding:8px 10px;border-radius:8px}
+  kbd{background:#eee;padding:2px 6px;border-radius:4px;border:1px solid #ddd}
+  .badge{position:absolute;left:12px;top:72px;background:rgba(255,255,255,0.95);padding:6px 8px;border-radius:6px;font-size:12px;display:none}
+  button{cursor:pointer}
+</style>
+</head>
+<body>
+<canvas id="gameCanvas" width="800" height="400" aria-label="Cat Jump game canvas"></canvas>
+<div class="hud"><strong>Cat Jump</strong><div style="font-size:13px">Use <kbd>↑</kbd> to jump, <kbd>→</kbd> to move forward — avoid water buckets and falling dogs.</div></div>
+<div class="controls"><span id="score">Score: 0</span>&nbsp;&nbsp;<button id="restartBtn">Restart</button></div>
+<div class="badge" id="suppressionBadge">Detected external MetaMask messages (filtered for UI cleanliness)</div>
+
+<script>
+/**
+ * NOTE about the "Failed to connect to MetaMask" message:
+ * - That error commonly comes from a browser extension or external script and not from this page.
+ * - It's impossible for this page to fully prevent other extensions from printing errors to their own console context.
+ * - What we do here is a **lightweight** approach: listen for global 'error' and 'unhandledrejection' events and, when
+ *   the message clearly mentions "MetaMask", we preventDefault() and show a small badge so you know the message was external.
+ * - We DO NOT override window.ethereum or console methods (those aggressive changes can interfere with extensions and were
+ *   avoided intentionally). If you still see the message after running this page, try disabling browser extensions temporarily
+ *   to identify which one is logging the message.
+ */
+(function detectAndFilterMetaMaskMessages(){
+  function mentionsMetaMask(text){
+    if (!text) return false;
+    try{ return /metamask|failed to connect to metamask/i.test(String(text)); }catch(e){ return false; }
+  }
+
+  let filtered = 0;
+  function showBadgeIfNeeded(){
+    if (filtered > 0){
+      const b = document.getElementById('suppressionBadge'); if (b) b.style.display = 'block';
+    }
+  }
+
+  window.addEventListener('error', function(ev){
+    try{
+      const msg = ev && ev.message ? ev.message : '';
+      if (mentionsMetaMask(msg)){
+        filtered++;
+        // prevent default browser error UI for this specific message
+        try{ ev.preventDefault && ev.preventDefault(); }catch(e){}
+      }
+    }catch(e){}
+  }, true);
+
+  window.addEventListener('unhandledrejection', function(ev){
+    try{
+      const reason = ev && ev.reason; const txt = reason && reason.message ? reason.message : String(reason);
+      if (mentionsMetaMask(txt)){
+        filtered++;
+        try{ ev.preventDefault && ev.preventDefault(); }catch(e){}
+      }
+    }catch(e){}
+  }, true);
+
+  // show badge a moment after page load if any were filtered
+  setTimeout(showBadgeIfNeeded, 800);
+
+  // expose a helper so you can simulate an external MetaMask message during testing
+  window.__test_simulateMetaMaskError = function(){
+    try{
+      // create an Error event (this is not perfect reproduction of extension stack, but useful for testing)
+      const err = new Error('Failed to connect to MetaMask (simulated)');
+      const ev = new ErrorEvent('error', { message: err.message, filename: 'simulated', lineno: 1, colno:1, error: err });
+      window.dispatchEvent(ev);
+    }catch(e){ console.warn('simulate failed', e); }
+  };
+})();
+
+// --- Game implementation (self-contained, pixel cat & vector buckets) ---
+(function(){
+  const canvas = document.getElementById('gameCanvas');
+  const ctx = canvas.getContext('2d');
+  if (!ctx){ document.body.innerHTML = '<div style="padding:20px">Canvas not supported</div>'; return; }
+
+  const CANVAS_W = canvas.width, CANVAS_H = canvas.height, GROUND_Y = 340;
+
+  // Pixel sprite: 10x10 map ('.' transparent, 'O' orange, 'W' white, 'P' pink)
+  const catPixels = [
+    '....OO....',
+    '...OOOO...',
+    '..OOOOOO..',
+    '.OOO..OOO.',
+    '.OO.W.WOO.',
+    '.OO..P.OO.',
+    '.OO....OO.',
+    '.OO....OO.',
+    '..OOOOOO..',
+    '...OOOO...'
+  ];
+  const colorMap = { 'O':'#FF9F1C', 'W':'#FFFFFF', 'P':'#FF6B9A', '.':null };
+  const PIXEL_SCALE = 4; // sprite 40x40
+  const SPRITE_W = catPixels[0].length * PIXEL_SCALE;
+  const SPRITE_H = catPixels.length * PIXEL_SCALE;
+
+  // Game state
+  const cat = { x: 50, y: GROUND_Y - SPRITE_H, width: SPRITE_W, height: SPRITE_H, vy: 0, jumping: false };
+  let gravity = 0.55, jumpPower = -14, baseSpeed = 3;
+  let obstacles = [], dogs = [];
+  let frame = 0, score = 0, gameOver = false;
+
+  function drawPixelSprite(map, x, y, scale){
+    for (let r=0;r<map.length;r++){
+      const row = map[r];
+      for (let c=0;c<row.length;c++){
+        const ch = row[c]; const color = colorMap[ch];
+        if (!color) continue;
+        ctx.fillStyle = color; ctx.fillRect(x + c*scale, y + r*scale, scale, scale);
+      }
+    }
+  }
+
+  function drawCat(){ drawPixelSprite(catPixels, Math.round(cat.x), Math.round(cat.y), PIXEL_SCALE); }
+
+  function drawBucket(x,y,w,h){
+    // bucket body
+    ctx.fillStyle = '#B0B0B0';
+    ctx.beginPath(); ctx.moveTo(x + w*0.15, y + h*0.15); ctx.lineTo(x + w*0.85, y + h*0.15); ctx.lineTo(x + w*0.75, y + h); ctx.lineTo(x + w*0.25, y + h); ctx.closePath(); ctx.fill();
+    // rim
+    ctx.fillStyle = '#909090'; ctx.fillRect(x + w*0.12, y, w*0.76, h*0.18);
+    // water
+    ctx.fillStyle = '#4FC3F7'; ctx.fillRect(x + w*0.18, y + h*0.2, w*0.64, h*0.4);
+    // shine
+    ctx.fillStyle = '#BFEFFF80'; ctx.fillRect(x + w*0.22, y + h*0.22, w*0.18, h*0.12);
+  }
+
+  function drawDog(x,y,w,h){
+    ctx.fillStyle = '#8B5A2B'; ctx.fillRect(x, y + h*0.25, w, h*0.5); ctx.fillRect(x + w*0.7, y, w*0.3, h*0.3);
+    // flame
+    ctx.fillStyle = '#FF6B00'; ctx.beginPath(); ctx.ellipse(x + w/2, y + h + 6, w*0.3, 8, 0, 0, Math.PI*2); ctx.fill();
+    ctx.fillStyle = '#FFD166'; ctx.beginPath(); ctx.ellipse(x + w/2, y + h + 4, w*0.18, 5, 0, 0, Math.PI*2); ctx.fill();
+  }
+
+  function spawnObstacle(){ const w = 28 + Math.random()*36; const h = 28 + Math.random()*28; obstacles.push({ x: CANVAS_W + 10, y: GROUND_Y - h, width: w, height: h }); }
+  function spawnDog(){ const w=32,h=28; dogs.push({ x: 20 + Math.random()*(CANVAS_W-60), y: -40, width: w, height: h, vy: 2 + Math.random()*2, alive: true }); }
+
+  function rectsOverlap(a,b){ return a.x < b.x + b.width && a.x + a.width > b.x && a.y < b.y + b.height && a.y + a.height > b.y; }
+
+  // Input
+  const keys = {};
+  window.addEventListener('keydown', function(e){ keys[e.code] = true; if (['ArrowUp','ArrowDown','ArrowLeft','ArrowRight','Space'].includes(e.code)) e.preventDefault(); });
+  window.addEventListener('keyup', function(e){ keys[e.code] = false; });
+
+  // touch
+  let touchRight = false;
+  canvas.addEventListener('touchstart', function(e){ e.preventDefault(); const t = e.touches[0]; if (t.clientX > window.innerWidth/2) touchRight = true; keys['ArrowUp'] = true; });
+  canvas.addEventListener('touchend', function(e){ e.preventDefault(); touchRight = false; keys['ArrowUp'] = false; });
+
+  function update(){
+    if (gameOver) return; frame++;
+    if ((keys['ArrowUp'] || keys['KeyW']) && !cat.jumping){ cat.vy = jumpPower; cat.jumping = true; }
+    const forward = (keys['ArrowRight'] || keys['KeyD'] || touchRight) ? baseSpeed : 0;
+
+    cat.vy += gravity; cat.y += cat.vy; cat.x += forward;
+    if (cat.x < 0) cat.x = 0; if (cat.x + cat.width > CANVAS_W) cat.x = CANVAS_W - cat.width;
+    if (cat.y + cat.height >= GROUND_Y){ cat.y = GROUND_Y - cat.height; cat.vy = 0; cat.jumping = false; }
+
+    if (frame % 100 === 0 && Math.random() < 0.8) spawnObstacle();
+    if (frame % 180 === 0 && Math.random() < 0.6) spawnDog();
+
+    for (let o of obstacles) o.x -= baseSpeed + 0.6 + Math.floor(score/80)*0.08;
+    obstacles = obstacles.filter(o => o.x + o.width > -30);
+    for (let d of dogs){ d.y += d.vy; if (d.y > CANVAS_H + 60) d.alive = false; }
+    dogs = dogs.filter(d => d.alive);
+
+    for (let o of obstacles) if (rectsOverlap(cat, o)) gameOver = true;
+    for (let d of dogs) if (rectsOverlap(cat, d)) gameOver = true;
+
+    if (!gameOver && frame % 10 === 0){ score++; document.getElementById('score').textContent = 'Score: ' + score; }
+
+    if (gameOver) document.getElementById('suppressionBadge').style.display = 'none';
+  }
+
+  function draw(){
+    ctx.clearRect(0,0,CANVAS_W,CANVAS_H);
+    // sky/ground
+    ctx.fillStyle = '#9BD0FF'; ctx.fillRect(0,0,CANVAS_W,GROUND_Y);
+    ctx.fillStyle = 'var(--ground)'; ctx.fillRect(0,GROUND_Y,CANVAS_W,CANVAS_H-GROUND_Y);
+
+    // draw obstacles/dogs/cat
+    for (let o of obstacles) drawBucket(o.x, o.y, o.width, o.height);
+    for (let d of dogs) drawDog(d.x, d.y, d.width, d.height);
+    drawCat();
+
+    if (gameOver){
+      ctx.fillStyle = 'rgba(0,0,0,0.6)'; ctx.fillRect(0,0,CANVAS_W,CANVAS_H);
+      ctx.fillStyle = '#fff'; ctx.font = '40px system-ui'; ctx.textAlign = 'center'; ctx.fillText('Game Over', CANVAS_W/2, CANVAS_H/2 - 10);
+      ctx.font = '18px system-ui'; ctx.fillText('Press Restart to play again', CANVAS_W/2, CANVAS_H/2 + 22);
+    }
+  }
+
+  function loop(){ try{ update(); draw(); }catch(err){ console.error('Game loop error', err); gameOver = true; } requestAnimationFrame(loop); }
+
+  document.getElementById('restartBtn').addEventListener('click', function(){
+    obstacles = []; dogs = []; frame = 0; score = 0; gameOver = false;
+    cat.x = 50; cat.y = GROUND_Y - cat.height; cat.vy = 0; cat.jumping = false;
+    document.getElementById('score').textContent = 'Score: 0';
+  });
+
+  // Test helpers
+  window.__test_addHazards = function(){ obstacles.push({x:500,y:GROUND_Y-40,width:40,height:40}); dogs.push({x:320,y:40,width:32,height:28,vy:2,alive:true}); };
+  window.__test_spawnObstacle = function(){ spawnObstacle(); };
+  window.__test_simulateMetaMaskError = function(){
+    // dispatch an ErrorEvent that our global listener will detect
+    try{ window.dispatchEvent(new ErrorEvent('error',{message:'Failed to connect to MetaMask (simulated)'})); }catch(e){ console.warn('simulate failed',e); }
+  };
+
+  // start
+  loop();
+})();
+</script>
+</body>
+</html>
