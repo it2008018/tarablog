@@ -23,64 +23,6 @@
 <div class="badge" id="suppressionBadge">Detected external MetaMask messages (filtered for UI cleanliness)</div>
 
 <script>
-/**
- * NOTE about the "Failed to connect to MetaMask" message:
- * - That error commonly comes from a browser extension or external script and not from this page.
- * - It's impossible for this page to fully prevent other extensions from printing errors to their own console context.
- * - What we do here is a **lightweight** approach: listen for global 'error' and 'unhandledrejection' events and, when
- *   the message clearly mentions "MetaMask", we preventDefault() and show a small badge so you know the message was external.
- * - We DO NOT override window.ethereum or console methods (those aggressive changes can interfere with extensions and were
- *   avoided intentionally). If you still see the message after running this page, try disabling browser extensions temporarily
- *   to identify which one is logging the message.
- */
-(function detectAndFilterMetaMaskMessages(){
-  function mentionsMetaMask(text){
-    if (!text) return false;
-    try{ return /metamask|failed to connect to metamask/i.test(String(text)); }catch(e){ return false; }
-  }
-
-  let filtered = 0;
-  function showBadgeIfNeeded(){
-    if (filtered > 0){
-      const b = document.getElementById('suppressionBadge'); if (b) b.style.display = 'block';
-    }
-  }
-
-  window.addEventListener('error', function(ev){
-    try{
-      const msg = ev && ev.message ? ev.message : '';
-      if (mentionsMetaMask(msg)){
-        filtered++;
-        // prevent default browser error UI for this specific message
-        try{ ev.preventDefault && ev.preventDefault(); }catch(e){}
-      }
-    }catch(e){}
-  }, true);
-
-  window.addEventListener('unhandledrejection', function(ev){
-    try{
-      const reason = ev && ev.reason; const txt = reason && reason.message ? reason.message : String(reason);
-      if (mentionsMetaMask(txt)){
-        filtered++;
-        try{ ev.preventDefault && ev.preventDefault(); }catch(e){}
-      }
-    }catch(e){}
-  }, true);
-
-  // show badge a moment after page load if any were filtered
-  setTimeout(showBadgeIfNeeded, 800);
-
-  // expose a helper so you can simulate an external MetaMask message during testing
-  window.__test_simulateMetaMaskError = function(){
-    try{
-      // create an Error event (this is not perfect reproduction of extension stack, but useful for testing)
-      const err = new Error('Failed to connect to MetaMask (simulated)');
-      const ev = new ErrorEvent('error', { message: err.message, filename: 'simulated', lineno: 1, colno:1, error: err });
-      window.dispatchEvent(ev);
-    }catch(e){ console.warn('simulate failed', e); }
-  };
-})();
-
 // --- Game implementation (self-contained, pixel cat & vector buckets) ---
 (function(){
   const canvas = document.getElementById('gameCanvas');
@@ -109,9 +51,13 @@
 
   // Game state
   const cat = { x: 50, y: GROUND_Y - SPRITE_H, width: SPRITE_W, height: SPRITE_H, vy: 0, jumping: false };
-  let gravity = 0.55, jumpPower = -14, baseSpeed = 3;
+  let gravity = 0.55, jumpPower = -14;
+  let baseSpeed = 3;
   let obstacles = [], dogs = [];
   let frame = 0, score = 0, gameOver = false;
+
+  let level = 1;
+  let levelUpTimer = 0;
 
   function drawPixelSprite(map, x, y, scale){
     for (let r=0;r<map.length;r++){
@@ -145,56 +91,196 @@
     ctx.fillStyle = '#FFD166'; ctx.beginPath(); ctx.ellipse(x + w/2, y + h + 4, w*0.18, 5, 0, 0, Math.PI*2); ctx.fill();
   }
 
-  function spawnObstacle(){ const w = 28 + Math.random()*36; const h = 28 + Math.random()*28; obstacles.push({ x: CANVAS_W + 10, y: GROUND_Y - h, width: w, height: h }); }
-  function spawnDog(){ const w=32,h=28; dogs.push({ x: 20 + Math.random()*(CANVAS_W-60), y: -40, width: w, height: h, vy: 2 + Math.random()*2, alive: true }); }
+  function spawnObstacle(){
+    const w = 28 + Math.random()*36;
+    const h = 28 + Math.random()*28;
+    obstacles.push({ x: CANVAS_W + 10, y: GROUND_Y - h, width: w, height: h });
+  }
+  function spawnDog(){
+    const w=32,h=28;
+    dogs.push({ x: 20 + Math.random()*(CANVAS_W-60), y: -40, width: w, height: h, vy: 2 + Math.random()*2, alive: true });
+  }
 
-  function rectsOverlap(a,b){ return a.x < b.x + b.width && a.x + a.width > b.x && a.y < b.y + b.height && a.y + a.height > b.y; }
+  function rectsOverlap(a,b){
+    return a.x < b.x + b.width && a.x + a.width > b.x && a.y < b.y + b.height && a.y + a.height > b.y;
+  }
 
   // Input
   const keys = {};
-  window.addEventListener('keydown', function(e){ keys[e.code] = true; if (['ArrowUp','ArrowDown','ArrowLeft','ArrowRight','Space'].includes(e.code)) e.preventDefault(); });
-  window.addEventListener('keyup', function(e){ keys[e.code] = false; });
+  window.addEventListener('keydown', function(e){
+    keys[e.code] = true;
+    if (['ArrowUp','ArrowDown','ArrowLeft','ArrowRight','Space'].includes(e.code)) e.preventDefault();
+  });
+  window.addEventListener('keyup', function(e){
+    keys[e.code] = false;
+  });
 
   // touch
   let touchRight = false;
-  canvas.addEventListener('touchstart', function(e){ e.preventDefault(); const t = e.touches[0]; if (t.clientX > window.innerWidth/2) touchRight = true; keys['ArrowUp'] = true; });
-  canvas.addEventListener('touchend', function(e){ e.preventDefault(); touchRight = false; keys['ArrowUp'] = false; });
+  canvas.addEventListener('touchstart', function(e){
+    e.preventDefault();
+    const t = e.touches[0];
+    if (t.clientX > window.innerWidth/2) touchRight = true;
+    keys['ArrowUp'] = true;
+  });
+  canvas.addEventListener('touchend', function(e){
+    e.preventDefault();
+    touchRight = false;
+    keys['ArrowUp'] = false;
+  });
 
   function update(){
-    if (gameOver) return; frame++;
-    if ((keys['ArrowUp'] || keys['KeyW']) && !cat.jumping){ cat.vy = jumpPower; cat.jumping = true; }
+    if (gameOver) return;
+    frame++;
+
+    if ((keys['ArrowUp'] || keys['KeyW']) && !cat.jumping){
+      cat.vy = jumpPower;
+      cat.jumping = true;
+    }
+
     const forward = (keys['ArrowRight'] || keys['KeyD'] || touchRight) ? baseSpeed : 0;
 
-    cat.vy += gravity; cat.y += cat.vy; cat.x += forward;
-    if (cat.x < 0) cat.x = 0; if (cat.x + cat.width > CANVAS_W) cat.x = CANVAS_W - cat.width;
-    if (cat.y + cat.height >= GROUND_Y){ cat.y = GROUND_Y - cat.height; cat.vy = 0; cat.jumping = false; }
+    cat.vy += gravity;
+    cat.y += cat.vy;
+    cat.x += forward;
 
-    if (frame % 100 === 0 && Math.random() < 0.8) spawnObstacle();
-    if (frame % 180 === 0 && Math.random() < 0.6) spawnDog();
+    if (cat.x < 0) cat.x = 0;
+    if (cat.x + cat.width > CANVAS_W) cat.x = CANVAS_W - cat.width;
 
-    for (let o of obstacles) o.x -= baseSpeed + 0.6 + Math.floor(score/80)*0.08;
+    if (cat.y + cat.height >= GROUND_Y){
+      cat.y = GROUND_Y - cat.height;
+      cat.vy = 0;
+      cat.jumping = false;
+    }
+
+    // Level up if cat reaches right edge (with some margin)
+    if (cat.x + cat.width >= CANVAS_W - 2 && !gameOver){
+      levelUp();
+      return; // skip rest of update this frame to avoid collision immediately after reset
+    }
+
+    // Spawn obstacles and dogs faster as level increases
+    const obstacleSpawnRate = Math.max(60, 100 - level * 10); // lower means more frequent
+    const dogSpawnRate = Math.max(100, 180 - level * 20);
+
+    if (frame % obstacleSpawnRate === 0 && Math.random() < 0.8) spawnObstacle();
+    if (frame % dogSpawnRate === 0 && Math.random() < 0.6) spawnDog();
+
+    // Move obstacles faster per level
+    const obstacleSpeed = baseSpeed + 0.6 + Math.floor(score/80)*0.08 + (level - 1) * 0.7;
+    for (let o of obstacles) o.x -= obstacleSpeed;
     obstacles = obstacles.filter(o => o.x + o.width > -30);
-    for (let d of dogs){ d.y += d.vy; if (d.y > CANVAS_H + 60) d.alive = false; }
+
+    // Move dogs faster per level
+    const dogSpeedInc = (level - 1) * 0.6;
+    for (let d of dogs){
+      d.y += d.vy + dogSpeedInc;
+      if (d.y > CANVAS_H + 60) d.alive = false;
+    }
     dogs = dogs.filter(d => d.alive);
 
+    // Collisions
     for (let o of obstacles) if (rectsOverlap(cat, o)) gameOver = true;
     for (let d of dogs) if (rectsOverlap(cat, d)) gameOver = true;
 
-    if (!gameOver && frame % 10 === 0){ score++; document.getElementById('score').textContent = 'Score: ' + score; }
+    // Score update
+    if (!gameOver && frame % 10 === 0){
+      score++;
+      document.getElementById('score').textContent = 'Score: ' + score + ' | Level: ' + level;
+    }
 
     if (gameOver) document.getElementById('suppressionBadge').style.display = 'none';
+
+    // Handle level up message timer
+    if (levelUpTimer > 0){
+      levelUpTimer--;
+      if (levelUpTimer === 0){
+        // Clear the message by redrawing next frame
+        draw();
+      }
+    }
+  }
+
+  function levelUp(){
+    level++;
+    levelUpTimer = 90; // ~1.5 seconds at 60fps
+
+    // Reset cat position
+    cat.x = 50;
+    cat.y = GROUND_Y - cat.height;
+    cat.vy = 0;
+    cat.jumping = false;
+
+    // Clear hazards
+    obstacles = [];
+    dogs = [];
+
+    // Reset frame count to avoid immediate spawn clutter
+    frame = 0;
+
+    // Optional: increase base speed slightly
+    baseSpeed += 0.3;
+  }
+
+  function drawBackground(){
+    // Change background color by level (cycles every 3 levels)
+    const lvlMod = (level - 1) % 3;
+    if (lvlMod === 0){
+      // Day: light blue
+      ctx.fillStyle = '#9BD0FF';
+      ctx.fillRect(0, 0, CANVAS_W, GROUND_Y);
+    } else if (lvlMod === 1){
+      // Sunset: orange-pink gradient
+      let grad = ctx.createLinearGradient(0,0,CANVAS_W,GROUND_Y);
+      grad.addColorStop(0,'#FF9A6A');
+      grad.addColorStop(0.5,'#FF5E62');
+      grad.addColorStop(1,'#FFD194');
+      ctx.fillStyle = grad;
+      ctx.fillRect(0,0,CANVAS_W,GROUND_Y);
+    } else {
+      // Night: dark blue with stars
+      ctx.fillStyle = '#0B1E3D';
+      ctx.fillRect(0,0,CANVAS_W,GROUND_Y);
+      drawStars();
+    }
+
+    // Ground stays same color
+    ctx.fillStyle = 'var(--ground)';
+    ctx.fillRect(0,GROUND_Y,CANVAS_W,CANVAS_H-GROUND_Y);
+  }
+
+  function drawStars(){
+    // Simple random stars based on level & frame so stars twinkle gently
+    const starCount = 50;
+    ctx.fillStyle = '#FFF';
+    for(let i=0; i<starCount; i++){
+      const x = (i * 47 + frame*2) % CANVAS_W;
+      const y = ((i * 37 + frame) % (GROUND_Y - 20)) + 10;
+      const alpha = 0.5 + 0.5 * Math.sin((frame + i * 10) * 0.05);
+      ctx.globalAlpha = alpha;
+      ctx.fillRect(x, y, 2, 2);
+    }
+    ctx.globalAlpha = 1;
   }
 
   function draw(){
     ctx.clearRect(0,0,CANVAS_W,CANVAS_H);
-    // sky/ground
-    ctx.fillStyle = '#9BD0FF'; ctx.fillRect(0,0,CANVAS_W,GROUND_Y);
-    ctx.fillStyle = 'var(--ground)'; ctx.fillRect(0,GROUND_Y,CANVAS_W,CANVAS_H-GROUND_Y);
+
+    drawBackground();
 
     // draw obstacles/dogs/cat
     for (let o of obstacles) drawBucket(o.x, o.y, o.width, o.height);
     for (let d of dogs) drawDog(d.x, d.y, d.width, d.height);
     drawCat();
+
+    if (levelUpTimer > 0){
+      ctx.fillStyle = 'rgba(0,0,0,0.7)';
+      ctx.fillRect(0, CANVAS_H/2 - 40, CANVAS_W, 80);
+      ctx.fillStyle = '#FFD700';
+      ctx.font = '48px system-ui';
+      ctx.textAlign = 'center';
+      ctx.fillText('Level Up!', CANVAS_W/2, CANVAS_H/2 + 15);
+    }
 
     if (gameOver){
       ctx.fillStyle = 'rgba(0,0,0,0.6)'; ctx.fillRect(0,0,CANVAS_W,CANVAS_H);
@@ -203,25 +289,36 @@
     }
   }
 
-  function loop(){ try{ update(); draw(); }catch(err){ console.error('Game loop error', err); gameOver = true; } requestAnimationFrame(loop); }
+  function loop(){
+    try{
+      update();
+      draw();
+    }catch(err){
+      console.error('Game loop error', err);
+      gameOver = true;
+    }
+    requestAnimationFrame(loop);
+  }
 
   document.getElementById('restartBtn').addEventListener('click', function(){
-    obstacles = []; dogs = []; frame = 0; score = 0; gameOver = false;
+    obstacles = []; dogs = []; frame = 0; score = 0; gameOver = false; level = 1; baseSpeed = 3; levelUpTimer = 0;
     cat.x = 50; cat.y = GROUND_Y - cat.height; cat.vy = 0; cat.jumping = false;
-    document.getElementById('score').textContent = 'Score: 0';
+    document.getElementById('score').textContent = 'Score: 0 | Level: 1';
   });
 
   // Test helpers
   window.__test_addHazards = function(){ obstacles.push({x:500,y:GROUND_Y-40,width:40,height:40}); dogs.push({x:320,y:40,width:32,height:28,vy:2,alive:true}); };
   window.__test_spawnObstacle = function(){ spawnObstacle(); };
   window.__test_simulateMetaMaskError = function(){
-    // dispatch an ErrorEvent that our global listener will detect
     try{ window.dispatchEvent(new ErrorEvent('error',{message:'Failed to connect to MetaMask (simulated)'})); }catch(e){ console.warn('simulate failed',e); }
   };
 
-  // start
+  // Initialize display with level too
+  document.getElementById('score').textContent = 'Score: 0 | Level: 1';
+
   loop();
 })();
 </script>
+
 </body>
 </html>
