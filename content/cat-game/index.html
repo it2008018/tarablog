@@ -30,21 +30,23 @@
   if (!ctx){ document.body.innerHTML = '<div style="padding:20px">Canvas not supported</div>'; return; }
 
   const CANVAS_W = canvas.width, CANVAS_H = canvas.height, GROUND_Y = 340;
+  const GROUND_COLOR = getComputedStyle(document.documentElement).getPropertyValue('--ground').trim() || '#654321';
 
-  // Pixel sprite: 10x10 map ('.' transparent, 'O' orange, 'W' white, 'P' pink)
+  // Pixel sprite: 10x10 map ('.' transparent)
+  // Updated to a more cat-like sprite with ears, eyes and a nose
   const catPixels = [
-    '....OO....',
-    '...OOOO...',
-    '..OOOOOO..',
-    '.OOO..OOO.',
-    '.OO.W.WOO.',
-    '.OO..P.OO.',
-    '.OO....OO.',
-    '.OO....OO.',
-    '..OOOOOO..',
-    '...OOOO...'
+    '..B....B..',
+    '.BBBBBBBB.',
+    'BBGGGGGGBB',
+    'BGWGGGGWGB',
+    'BGGGPGGGGB',
+    'BGGGGGGGGB',
+    'BBGGGGGGBB',
+    'BGGGGGGGGB',
+    'BGGGGGGGGB',
+    '.BBBBBBBB.'
   ];
-  const colorMap = { 'O':'#FF9F1C', 'W':'#FFFFFF', 'P':'#FF6B9A', '.':null };
+  const colorMap = { 'B':'#333333', 'G':'#9E9E9E', 'W':'#FFFFFF', 'P':'#FF6B9A', 'O':'#FF9F1C', '.':null };
   const PIXEL_SCALE = 4; // sprite 40x40
   const SPRITE_W = catPixels[0].length * PIXEL_SCALE;
   const SPRITE_H = catPixels.length * PIXEL_SCALE;
@@ -58,6 +60,13 @@
 
   let level = 1;
   let levelUpTimer = 0;
+  // Ground decoration: stones cache
+  let groundStones = [];
+  let stonesLevel = 0;
+  // Global scale factor for trees
+  const TREE_SCALE = 1.5;
+  // Global scale factor for dogs (fire) — 1x bigger = 2.0x size
+  const DOG_SCALE = 2.0;
 
   function drawPixelSprite(map, x, y, scale){
     for (let r=0;r<map.length;r++){
@@ -73,56 +82,200 @@
   function drawCat(){ drawPixelSprite(catPixels, Math.round(cat.x), Math.round(cat.y), PIXEL_SCALE); }
 
   function drawBucket(x,y,w,h){
-    // bucket body
-    ctx.fillStyle = '#B0B0B0';
-    ctx.beginPath(); ctx.moveTo(x + w*0.15, y + h*0.15); ctx.lineTo(x + w*0.85, y + h*0.15); ctx.lineTo(x + w*0.75, y + h); ctx.lineTo(x + w*0.25, y + h); ctx.closePath(); ctx.fill();
-    // rim
-    ctx.fillStyle = '#909090'; ctx.fillRect(x + w*0.12, y, w*0.76, h*0.18);
-    // water
-    ctx.fillStyle = '#4FC3F7'; ctx.fillRect(x + w*0.18, y + h*0.2, w*0.64, h*0.4);
-    // shine
-    ctx.fillStyle = '#BFEFFF80'; ctx.fillRect(x + w*0.22, y + h*0.22, w*0.18, h*0.12);
+    // More defined, glass-like water container with rim, handle, gradients and shadows
+    // Now with subtle tilt/sway for extra polish (rotates around bottom center)
+    ctx.save();
+
+    const pivotX = x + w*0.5;
+    const pivotY = y + h;
+    const sway = 0.08 * Math.sin((frame + x) * 0.04); // gentle oscillation
+    const lean = -0.02; // slight lean into motion
+    const angle = sway + lean;
+    ctx.translate(pivotX, pivotY);
+    ctx.rotate(angle);
+    ctx.translate(-pivotX, -pivotY);
+
+    const topY = y + h*0.15;
+    const leftTop = x + w*0.15, rightTop = x + w*0.85;
+    const leftBottom = x + w*0.25, rightBottom = x + w*0.75;
+
+    // Body path
+    ctx.beginPath();
+    ctx.moveTo(leftTop, topY);
+    ctx.lineTo(rightTop, topY);
+    ctx.lineTo(rightBottom, y + h);
+    ctx.lineTo(leftBottom, y + h);
+    ctx.closePath();
+
+    // Metal/glass gradient for body
+    let bodyGrad = ctx.createLinearGradient(0, topY, 0, y + h);
+    bodyGrad.addColorStop(0, '#D7D7D7');
+    bodyGrad.addColorStop(0.5, '#AEAEAE');
+    bodyGrad.addColorStop(1, '#CFCFCF');
+    ctx.fillStyle = bodyGrad;
+    ctx.fill();
+
+    // Outline
+    ctx.lineWidth = Math.max(1.5, w * 0.02);
+    ctx.strokeStyle = '#6F6F6F';
+    ctx.stroke();
+
+    // Top rim (ellipse)
+    const rimCx = x + w * 0.5;
+    const rimCy = y + h * 0.13;
+    const rimRx = w * 0.38;
+    const rimRy = h * 0.06;
+    ctx.beginPath();
+    ctx.ellipse(rimCx, rimCy, rimRx, rimRy, 0, 0, Math.PI*2);
+    let rimGrad = ctx.createLinearGradient(rimCx, rimCy - rimRy, rimCx, rimCy + rimRy);
+    rimGrad.addColorStop(0, '#CFCFCF');
+    rimGrad.addColorStop(1, '#9C9C9C');
+    ctx.fillStyle = rimGrad;
+    ctx.fill();
+    ctx.lineWidth = Math.max(1, w * 0.015);
+    ctx.strokeStyle = '#7A7A7A';
+    ctx.stroke();
+
+    // Inner cavity clip for water and inner shading
+    const inset = w * 0.03;
+    const iTopY = y + h * 0.20;
+    const iBottomY = y + h * 0.88;
+    const iLeftTop = leftTop + inset, iRightTop = rightTop - inset;
+    const iLeftBottom = leftBottom + inset, iRightBottom = rightBottom - inset;
+    ctx.save();
+    ctx.beginPath();
+    ctx.moveTo(iLeftTop, iTopY);
+    ctx.lineTo(iRightTop, iTopY);
+    ctx.lineTo(iRightBottom, iBottomY);
+    ctx.lineTo(iLeftBottom, iBottomY);
+    ctx.closePath();
+    ctx.clip();
+
+    // Water volume (with trapezoid to match glass walls)
+    const waterTopY = y + h * 0.22;
+    const waterBottomY = y + h * 0.65;
+    ctx.beginPath();
+    ctx.moveTo(iLeftTop, waterTopY);
+    ctx.lineTo(iRightTop, waterTopY);
+    ctx.lineTo(iRightBottom, waterBottomY);
+    ctx.lineTo(iLeftBottom, waterBottomY);
+    ctx.closePath();
+    let waterGrad = ctx.createLinearGradient(0, waterTopY, 0, waterBottomY);
+    waterGrad.addColorStop(0, '#7AD6FF');
+    waterGrad.addColorStop(0.6, '#34A9E6');
+    waterGrad.addColorStop(1, '#1488CC');
+    ctx.fillStyle = waterGrad;
+    ctx.fill();
+
+    // Water surface meniscus highlight (ellipse)
+    ctx.globalAlpha = 0.45;
+    ctx.beginPath();
+    ctx.ellipse(rimCx, waterTopY + h*0.01, rimRx * 0.82, rimRy * 0.55, 0, 0, Math.PI*2);
+    let meniscus = ctx.createRadialGradient(rimCx, waterTopY, 0, rimCx, waterTopY, rimRx * 0.9);
+    meniscus.addColorStop(0, 'rgba(255,255,255,0.9)');
+    meniscus.addColorStop(1, 'rgba(255,255,255,0)');
+    ctx.fillStyle = meniscus;
+    ctx.fill();
+    ctx.globalAlpha = 1;
+
+    // Inner gloss stripes
+    ctx.fillStyle = 'rgba(255,255,255,0.25)';
+    ctx.fillRect(x + w*0.32, y + h*0.22, w*0.04, h*0.58);
+    ctx.fillStyle = 'rgba(255,255,255,0.12)';
+    ctx.fillRect(x + w*0.37, y + h*0.27, w*0.02, h*0.50);
+
+    // Inner vertical shadow for depth
+    let innerShadow = ctx.createLinearGradient(0, iTopY, 0, iBottomY);
+    innerShadow.addColorStop(0, 'rgba(0,0,0,0.10)');
+    innerShadow.addColorStop(0.5, 'rgba(0,0,0,0)');
+    innerShadow.addColorStop(1, 'rgba(0,0,0,0.12)');
+    ctx.fillStyle = innerShadow;
+    ctx.fillRect(iLeftTop, iTopY, iRightTop - iLeftTop, iBottomY - iTopY);
+
+    ctx.restore(); // end inner clip
+
+    // Side seams for definition
+    ctx.strokeStyle = 'rgba(0,0,0,0.15)';
+    ctx.lineWidth = Math.max(1, w * 0.01);
+    ctx.beginPath(); ctx.moveTo(leftTop, topY); ctx.lineTo(leftBottom, y + h); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(rightTop, topY); ctx.lineTo(rightBottom, y + h); ctx.stroke();
+
+    // Handle
+    ctx.strokeStyle = '#7A7A7A';
+    ctx.lineWidth = Math.max(1.5, w * 0.025);
+    ctx.beginPath();
+    ctx.arc(rimCx, y + h * 0.02, w * 0.35, Math.PI * 0.95, Math.PI * 0.05, false);
+    ctx.stroke();
+    // handle joints
+    ctx.fillStyle = '#8A8A8A';
+    ctx.beginPath(); ctx.arc(leftTop, topY, Math.max(1.5, w*0.02), 0, Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.arc(rightTop, topY, Math.max(1.5, w*0.02), 0, Math.PI*2); ctx.fill();
+
+    ctx.restore(); // end rotation
+
+    // Ground shadow (not rotated)
+    ctx.save();
+    ctx.globalAlpha = 0.22;
+    ctx.fillStyle = '#000';
+    ctx.beginPath();
+    ctx.ellipse(x + w*0.5, y + h + Math.max(3, h*0.04), w*0.38, Math.max(4, h*0.12), 0, 0, Math.PI*2);
+    ctx.fill();
+    ctx.globalAlpha = 1;
+    ctx.restore();
   }
 
 function drawDog(x, y, w, h){
-  // Flickering flame shape
-  const flicker = 2 + Math.sin(frame * 0.15) * 2;
+  // Rounder, larger flame (fire)
+  const flicker = 1 + Math.sin(frame * 0.18 + x * 0.01) * 1.2;
+  const cx = x + w / 2;
+  const top = y;
+  const bottom = y + h;
 
-  // Base flame shape (triangle-ish)
+  // Outer glow
+  ctx.save();
+  ctx.shadowColor = 'rgba(255,140,0,0.6)';
+  ctx.shadowBlur = Math.max(6, w * 0.15);
+
+  // Rounded flame body
   ctx.beginPath();
-  ctx.moveTo(x + w/2, y); // tip of flame (top center)
-  ctx.bezierCurveTo(x + w*0.9 + flicker*0.5, y + h*0.4, x + w*0.6, y + h*0.9, x + w/2, y + h);
-  ctx.bezierCurveTo(x + w*0.4, y + h*0.9, x + w*0.1 - flicker*0.5, y + h*0.4, x + w/2, y);
+  ctx.moveTo(cx, top);
+  ctx.bezierCurveTo(x + w * 0.9, y + h * 0.28, x + w * 0.9, y + h * 0.72, cx, bottom);
+  ctx.bezierCurveTo(x + w * 0.1, y + h * 0.72, x + w * 0.1, y + h * 0.28, cx, top);
   ctx.closePath();
 
-  // Fill gradient from yellow to red
-  let grad = ctx.createRadialGradient(x + w/2, y + h/2, w*0.1, x + w/2, y + h/2, w*0.8);
-  grad.addColorStop(0, '#FFD166'); // bright yellow center
-  grad.addColorStop(0.7, '#F95738'); // orange mid
-  grad.addColorStop(1, '#D72631'); // deep red edges
+  let grad = ctx.createRadialGradient(cx, y + h * 0.58, w * 0.12, cx, y + h * 0.58, w * 0.65);
+  grad.addColorStop(0, '#FFF176');
+  grad.addColorStop(0.45, '#FF9800');
+  grad.addColorStop(1, '#D84315');
   ctx.fillStyle = grad;
   ctx.fill();
+  ctx.restore();
 
-  // Inner flicker shapes for glow effect
-  ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
+  // Inner bright cores
+  ctx.save();
+  ctx.globalAlpha = 0.9;
+  ctx.fillStyle = 'rgba(255,255,255,0.85)';
   ctx.beginPath();
-  ctx.ellipse(x + w/2, y + h*0.6 + flicker*0.5, w*0.15, h*0.25, 0, 0, Math.PI*2);
+  ctx.ellipse(cx, y + h * 0.58 + flicker * 0.6, w * 0.16, h * 0.24, 0, 0, Math.PI * 2);
   ctx.fill();
 
-  ctx.fillStyle = 'rgba(255, 255, 255, 0.3)';
+  ctx.globalAlpha = 0.6;
+  ctx.fillStyle = 'rgba(255,255,255,0.6)';
   ctx.beginPath();
-  ctx.ellipse(x + w/2 + flicker, y + h*0.4, w*0.1, h*0.2, 0, 0, Math.PI*2);
+  ctx.ellipse(cx + w * 0.08 * Math.sin(frame * 0.1), y + h * 0.38, w * 0.11, h * 0.18, 0, 0, Math.PI * 2);
   ctx.fill();
+  ctx.restore();
 }
 
 
   function spawnObstacle(){
-    const w = 28 + Math.random()*36;
+    // Slightly wider buckets
+    const w = 36 + Math.random()*40; // was 28 + Math.random()*36
     const h = 28 + Math.random()*28;
     obstacles.push({ x: CANVAS_W + 10, y: GROUND_Y - h, width: w, height: h });
   }
   function spawnDog(){
-    const w=32,h=28;
+    const w = 32 * DOG_SCALE, h = 28 * DOG_SCALE;
     dogs.push({ x: 20 + Math.random()*(CANVAS_W-60), y: -40, width: w, height: h, vy: 2 + Math.random()*2, alive: true });
   }
 
@@ -153,6 +306,28 @@ function drawDog(x, y, w, h){
     touchRight = false;
     keys['ArrowUp'] = false;
   });
+  
+let currentLevel = 1;
+let lives = 3;
+
+function startLevel(level) {
+    console.log(`Starting Level ${level}`);
+    // reset positions, obstacles, and other variables for this level
+}
+
+function loseLife() {
+    lives--;
+    if (lives <= 0) {
+        gameOver = true;
+        restartFromSameLevel();
+    }
+}
+
+function restartFromSameLevel() {
+    lives = 3; // or whatever you want to reset
+    gameOver = false;
+    startLevel(currentLevel); // start from same level
+}
 
   function update(){
     if (gameOver) return;
@@ -269,9 +444,16 @@ function drawDog(x, y, w, h){
       drawStars();
     }
 
+    // New: parallax trees between sky and ground
+    drawTrees(lvlMod);
+
     // Ground stays same color
-    ctx.fillStyle = 'var(--ground)';
+    ctx.fillStyle = GROUND_COLOR;
     ctx.fillRect(0,GROUND_Y,CANVAS_W,CANVAS_H-GROUND_Y);
+
+    // New: stones on ground surface
+    ensureGroundStones();
+    drawGroundStones();
   }
 
   function drawStars(){
@@ -286,6 +468,155 @@ function drawDog(x, y, w, h){
       ctx.fillRect(x, y, 2, 2);
     }
     ctx.globalAlpha = 1;
+  }
+
+  // New helpers: parallax trees
+  function drawTrees(lvlMod){
+    // lvlMod: 0 day, 1 sunset, 2 night
+    const isNight = (lvlMod === 2);
+
+    // Far layer (darker, smaller, slower)
+    const spacingF = 180;
+    const speedF = 0.35 + (level - 1) * 0.05; // subtle speed increase per level
+    const offsetF = (frame * speedF) % spacingF;
+    for (let i = -1; i <= Math.ceil(CANVAS_W / spacingF) + 1; i++){
+      const x = i * spacingF - offsetF;
+      const scale = 0.7 + 0.25 * (0.5 + 0.5 * Math.sin((i + level) * 1.7));
+      drawTree(x, GROUND_Y, 0.75 * scale * TREE_SCALE, isNight, true);
+    }
+
+    // Near layer (brighter, larger, faster)
+    const spacingN = 260;
+    const speedN = 0.75 + (level - 1) * 0.08;
+    const offsetN = (frame * speedN) % spacingN;
+    for (let i = -1; i <= Math.ceil(CANVAS_W / spacingN) + 1; i++){
+      const x = i * spacingN - offsetN + 60;
+      const scale = 0.95 + 0.4 * (0.5 + 0.5 * Math.sin((i * 1.3 + level) * 1.1));
+      drawTree(x, GROUND_Y, 1.0 * scale * TREE_SCALE, isNight, false);
+    }
+  }
+
+  function drawTree(x, groundY, scale, isNight, isFar){
+    const trunkH = (24 * scale) * (isFar ? 0.85 : 1);
+    const trunkW = (8 * scale) * (isFar ? 0.85 : 1);
+    const canopyR = (16 * scale) * (isFar ? 0.9 : 1.05);
+
+    // Clamp to reasonable sizes (expanded for bigger trees)
+    const tH = Math.max(10, Math.min(66, trunkH));
+    const tW = Math.max(4, Math.min(21, trunkW));
+    const r  = Math.max(10, Math.min(42, canopyR));
+
+    const trunkX = x - tW/2;
+    const trunkTopY = groundY - tH;
+
+    ctx.save();
+
+    // Slight sway effect for near layer
+    const sway = isFar ? 0 : Math.sin((frame + x) * 0.01) * 0.6;
+    ctx.translate(x, trunkTopY + tH);
+    ctx.rotate(sway * 0.005);
+    ctx.translate(-x, -(trunkTopY + tH));
+
+    // Colors by time of day
+    if (isNight){
+      ctx.globalAlpha = isFar ? 0.55 : 0.75;
+      ctx.fillStyle = '#08223a'; // silhouette
+      // trunk
+      ctx.fillRect(trunkX, trunkTopY, tW, tH);
+      // canopy as blobby shape of circles
+      const cy = trunkTopY;
+      ctx.beginPath();
+      ctx.arc(x, cy - r * 0.2, r, 0, Math.PI * 2);
+      ctx.arc(x - r * 0.85, cy + r * 0.05, r * 0.8, 0, Math.PI * 2);
+      ctx.arc(x + r * 0.85, cy + r * 0.05, r * 0.78, 0, Math.PI * 2);
+      ctx.closePath();
+      ctx.fill();
+      ctx.globalAlpha = 1;
+    } else {
+      // Day/Sunset colors
+      // trunk
+      ctx.fillStyle = isFar ? '#6b4f3a' : '#7a523b';
+      ctx.globalAlpha = isFar ? 0.85 : 1;
+      ctx.fillRect(trunkX, trunkTopY, tW, tH);
+
+      // canopy gradient
+      const topY = trunkTopY - r * 0.8;
+      const grad = ctx.createLinearGradient(x, topY, x, trunkTopY + r * 0.6);
+      if (isFar){
+        grad.addColorStop(0, '#2d5f3a');
+        grad.addColorStop(1, '#3a7a4a');
+      } else if (!isFar && !isNight){
+        // Slightly warmer greens during sunset
+        grad.addColorStop(0, '#2e7d32');
+        grad.addColorStop(1, '#41a05a');
+      }
+      ctx.fillStyle = grad;
+      ctx.beginPath();
+      ctx.arc(x, trunkTopY, r, 0, Math.PI * 2);
+      ctx.arc(x - r * 0.85, trunkTopY + r * 0.15, r * 0.78, 0, Math.PI * 2);
+      ctx.arc(x + r * 0.85, trunkTopY + r * 0.15, r * 0.75, 0, Math.PI * 2);
+      ctx.closePath();
+      ctx.fill();
+      ctx.globalAlpha = 1;
+
+      // soft shadow under canopy on trunk for depth
+      ctx.fillStyle = 'rgba(0,0,0,0.08)';
+      ctx.fillRect(trunkX, trunkTopY + 2, tW, Math.min(tH, r * 0.6));
+    }
+
+    ctx.restore();
+  }
+
+  // New helpers: ground stones
+  function ensureGroundStones(){
+    if (stonesLevel !== level || groundStones.length === 0){
+      stonesLevel = level;
+      groundStones = [];
+      const count = 36; // adjust density
+      for (let i=0;i<count;i++){
+        const rx = 3 + Math.random()*7; // radius x
+        const ry = Math.max(2, rx*0.55 + Math.random()*2);
+        const x = Math.random()*CANVAS_W;
+        const y = GROUND_Y + 6 + Math.random()*26; // sit within top band of ground
+        const rot = (Math.random()-0.5) * 0.7;
+        const tone = Math.random();
+        const color = tone < 0.33 ? '#b1b1ad' : (tone < 0.66 ? '#9a9a95' : '#c2c2bd');
+        groundStones.push({ x, y, rx, ry, rot, color });
+      }
+    }
+  }
+
+  function drawGroundStones(){
+    ctx.save();
+    for (const s of groundStones){
+      // shadow
+      ctx.save();
+      ctx.globalAlpha = 0.22;
+      ctx.fillStyle = '#000';
+      ctx.beginPath();
+      ctx.ellipse(s.x, s.y + s.ry + 2, Math.max(1, s.rx*0.9), Math.max(1, s.ry*0.5), 0, 0, Math.PI*2);
+      ctx.fill();
+      ctx.restore();
+
+      // stone body with subtle gradient highlight
+      ctx.save();
+      ctx.translate(s.x, s.y);
+      ctx.rotate(s.rot);
+      const grad = ctx.createLinearGradient(-s.rx, -s.ry, s.rx, s.ry);
+      grad.addColorStop(0, 'rgba(255,255,255,0.28)');
+      grad.addColorStop(0.35, s.color);
+      grad.addColorStop(1, 'rgba(0,0,0,0.18)');
+      ctx.fillStyle = grad;
+      ctx.beginPath();
+      ctx.ellipse(0, 0, s.rx, s.ry, 0, 0, Math.PI*2);
+      ctx.fill();
+      // outline
+      ctx.strokeStyle = 'rgba(0,0,0,0.12)';
+      ctx.lineWidth = 0.8;
+      ctx.stroke();
+      ctx.restore();
+    }
+    ctx.restore();
   }
 
   function draw(){
@@ -326,16 +657,22 @@ function drawDog(x, y, w, h){
   }
 
   document.getElementById('restartBtn').addEventListener('click', function(){
-    obstacles = []; dogs = []; frame = 0; score = 0; gameOver = false; level = 1; baseSpeed = 3; levelUpTimer = 0;
+    // Restart from the same level it ended on
+    obstacles = []; dogs = []; frame = 0; score = 0; gameOver = false; levelUpTimer = 0;
+    // keep current level; recompute base speed for this level
+    baseSpeed = 3 + 0.3 * (level - 1);
     cat.x = 50; cat.y = GROUND_Y - cat.height; cat.vy = 0; cat.jumping = false;
-    document.getElementById('score').textContent = 'Score: 0 | Level: 1';
+    document.getElementById('score').textContent = 'Score: 0 | Level: ' + level;
   });
 
   // Test helpers
-  window.__test_addHazards = function(){ obstacles.push({x:500,y:GROUND_Y-40,width:40,height:40}); dogs.push({x:320,y:40,width:32,height:28,vy:2,alive:true}); };
+  window.__test_addHazards = function(){
+    obstacles.push({ x: 500, y: GROUND_Y - 40, width: 40, height: 40 });
+    dogs.push({ x: 320, y: 40, width: 32, height: 28, vy: 2, alive: true });
+  };
   window.__test_spawnObstacle = function(){ spawnObstacle(); };
   window.__test_simulateMetaMaskError = function(){
-    try{ window.dispatchEvent(new ErrorEvent('error',{message:'Failed to connect to MetaMask (simulated)'})); }catch(e){ console.warn('simulate failed',e); }
+    try{ window.dispatchEvent(new ErrorEvent('error', { message: 'Failed to connect to MetaMask (simulated)' })); }catch(e){ console.warn('simulate failed', e); }
   };
 
   // Initialize display with level too
